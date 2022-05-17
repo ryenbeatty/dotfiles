@@ -1,3 +1,6 @@
+# enter directory by typing folder name
+setopt autocd
+
 # matches case insensitive for lowercase
 zstyle ':completion:*' matcher-list 'm:{a-z}={A-Z}'
 
