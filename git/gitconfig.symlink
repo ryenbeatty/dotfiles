@@ -33,3 +33,14 @@
         default = simple
 [credential]
 	helper = osxkeychain
+[pull]
+        rebase = true
+[fetch]
+        prune = true        
+[user]
+        name = Ryen Beatty
+        email = mail@ryenbeatty.info
+[credential]
+        helper = osxkeychain
+[diff]
+	colorMoved = zebra
