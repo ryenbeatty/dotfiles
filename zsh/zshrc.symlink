@@ -1,10 +1,14 @@
+export PATH="$PATH:$HOME/.local/scripts"
+
+ZSH_THEME='gruvbox'
+# SOLARIZED_THEME="dark"
+# source "$HOME/.oh-my-zsh/oh-my-zsh.sh"
+
 # shortcut to this dotfiles path is $ZSH
 export ZSH=$HOME/.dotfiles
 
-ZSH_THEME="robbyrussell"
-
 # your project folder that we can `c [tab]` to
-export PROJECTS=~/Workspace
+export PROJECTS=~/Code
 
 # Stash your environment variables in ~/.localrc. This means they'll stay out
 # of your main dotfiles repository (which may be public, like this one), but
@@ -51,7 +55,7 @@ zle -N down-line-or-beginning-search
 bindkey "^[[A" up-line-or-beginning-search # Up
 bindkey "^[[B" down-line-or-beginning-search # Down
 
-plugins=(git, zsh-syntax-highlighting, zsh-autosuggestions, powerlevel10k)
+plugins=(git zsh-syntax-highlighting zsh-autosuggestions powerlevel10k tmux)
 
 export NVM_DIR="$HOME/.nvm"
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
@@ -66,3 +70,62 @@ esac
 # pnpm end
 
 export GPG_TTY=$(tty)
+# >>> conda initialize >>>
+# !! Contents within this block are managed by 'conda init' !!
+__conda_setup="$('/opt/homebrew/Caskroom/miniconda/base/bin/conda' 'shell.zsh' 'hook' 2> /dev/null)"
+if [ $? -eq 0 ]; then
+    eval "$__conda_setup"
+else
+    if [ -f "/opt/homebrew/Caskroom/miniconda/base/etc/profile.d/conda.sh" ]; then
+        . "/opt/homebrew/Caskroom/miniconda/base/etc/profile.d/conda.sh"
+    else
+        export PATH="/opt/homebrew/Caskroom/miniconda/base/bin:$PATH"
+    fi
+fi
+unset __conda_setup
+# <<< conda initialize <<<
+
+
+alias v="nvim"
+
+# Set up fzf key bindings and fuzzy completion
+source <(fzf --zsh)
+bindkey -s '^F' "tmux-git-sessionizer\n"
+
+#determines search program for fzf
+if type ag &> /dev/null; then
+    export FZF_DEFAULT_COMMAND='ag -p ~/.gitignore -g ""'
+fi
+#refer rg over ag
+if type rg &> /dev/null; then
+    export FZF_DEFAULT_COMMAND='rg --files --hidden'
+fi
+
+# cd /Users/ryenbeatty/Code/
+alias reload!='source ~/.zshrc'
+
+# Auto-start tmux session when entering project directories
+cd() {
+    builtin cd "$@" || return
+    
+    # Only activate for git repositories or directories with specific files
+    if [[ -d .git ]] || [[ -f package.json ]] || [[ -f Cargo.toml ]]; then
+        # Only run if we're not already in tmux
+        if [[ -z "$TMUX" ]]; then
+            session_name=$(basename "$PWD" | tr . _)
+            
+            # Check if session exists
+            if ! tmux has-session -t="$session_name" 2> /dev/null; then
+                # Create new session in background
+                tmux new-session -d -s "$session_name"
+            fi
+            
+            # Attach to the session
+            tmux attach-session -t "$session_name"
+        fi
+    fi
+}
+
+alias gittail='watch -n 1 -c "git log --graph --pretty=format:'"'"'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset'"'"' --abbrev-commit -15"'
+
+alias notify='afplay /System/Library/Sounds/Funk.aiff'

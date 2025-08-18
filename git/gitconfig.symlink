@@ -32,12 +32,15 @@
         # Setting to git 2.0 default to suppress warning message
         default = simple
         autoSetupRemote = true
+        followTags = true
 [credential]
 	helper = osxkeychain
 [pull]
         rebase = true
 [fetch]
-        prune = true        
+        prune = true
+        pruneTags = true
+        all = true    
 [user]
         name = Ryen Beatty
         email = mail@ryenbeatty.info
@@ -45,7 +48,10 @@
 [credential]
         helper = osxkeychain
 [diff]
-	colorMoved = zebra
+        algorithm = histogram
+        colorMoved = plain
+        mnemonicPrefix = true
+        renames = true
 [filter "lfs"]
 	process = git-lfs filter-process
 	required = true
@@ -57,3 +63,7 @@
 	gpgsign = false
 [init]
         defaultBranch = main
+[branch]
+        sort = -committerdate
+[tag]
+        sort = version:refname                

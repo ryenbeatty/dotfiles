@@ -1,1 +1,0 @@
-export DJANGO_SETTINGS_MODULE="kwest_backend.settings.dev_settings"
