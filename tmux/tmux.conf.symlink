@@ -32,3 +32,7 @@ bind -n M-L next-window
 
 # sessionizer
 bind-key -r C-f run-shell "tmux neww ~/bin/tmux-sessionizer"
+
+# vi mode
+setw -g mode-keys vi
+

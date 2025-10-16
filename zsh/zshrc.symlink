@@ -1,3 +1,9 @@
+if [[ "$TERM_PROGRAM" == "vscode" && ! -t 1 ]]; then
+  return
+fi
+
+printf "\e[?1042l"
+
 export PATH="$PATH:$HOME/.local/scripts"
 
 ZSH_THEME='gruvbox'
@@ -129,3 +135,14 @@ cd() {
 alias gittail='watch -n 1 -c "git log --graph --pretty=format:'"'"'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset'"'"' --abbrev-commit -15"'
 
 alias notify='afplay /System/Library/Sounds/Funk.aiff'
+
+# bun completions
+[ -s "/Users/ryenbeatty/.bun/_bun" ] && source "/Users/ryenbeatty/.bun/_bun"
+
+# bun
+export BUN_INSTALL="$HOME/.bun"
+export PATH="$BUN_INSTALL/bin:$PATH"
+
+# bun
+export BUN_INSTALL="$HOME/.bun"
+export PATH="$BUN_INSTALL/bin:$PATH"
