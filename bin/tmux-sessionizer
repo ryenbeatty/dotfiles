@@ -1,0 +1,39 @@
+#!/usr/bin/env bash
+
+# This script creates or attaches to tmux sessions for your projects
+# It uses fzf to let you fuzzy search through your project directories
+
+if [[ $# -eq 1 ]]; then
+    selected=$1
+else
+    # CUSTOMIZE THESE PATHS TO YOUR PROJECT DIRECTORIES
+    # Add all directories where you keep your projects
+    selected=$(find ~/Code -mindepth 1 -maxdepth 2 -type d 2>/dev/null | fzf)
+fi
+
+if [[ -z $selected ]]; then
+    exit 0
+fi
+
+# Create a valid session name (replace . with _)
+selected_name=$(basename "$selected" | tr . _)
+tmux_running=$(pgrep tmux)
+
+# If tmux isn't running at all, start it with a new session
+if [[ -z $TMUX ]] && [[ -z $tmux_running ]]; then
+    tmux new-session -s $selected_name -c $selected
+    exit 0
+fi
+
+# Create the session if it doesn't exist (in detached mode)
+if ! tmux has-session -t=$selected_name 2> /dev/null; then
+    tmux new-session -ds $selected_name -c $selected
+fi
+
+# If we're outside tmux, attach to the session
+if [[ -z $TMUX ]]; then
+    tmux attach-session -t $selected_name
+else
+    # If we're inside tmux, switch to the session
+    tmux switch-client -t $selected_name
+fi

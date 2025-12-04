@@ -6,9 +6,6 @@ printf "\e[?1042l"
 
 export PATH="$PATH:$HOME/.local/scripts"
 
-ZSH_THEME='gruvbox'
-# SOLARIZED_THEME="dark"
-# source "$HOME/.oh-my-zsh/oh-my-zsh.sh"
 
 # shortcut to this dotfiles path is $ZSH
 export ZSH=$HOME/.dotfiles
@@ -61,8 +58,7 @@ zle -N down-line-or-beginning-search
 bindkey "^[[A" up-line-or-beginning-search # Up
 bindkey "^[[B" down-line-or-beginning-search # Down
 
-plugins=(git zsh-syntax-highlighting zsh-autosuggestions powerlevel10k tmux)
-
+# Load NVM if available
 export NVM_DIR="$HOME/.nvm"
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
 [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
@@ -73,9 +69,14 @@ export GPG_TTY=$(tty)
 
 alias v="nvim"
 
-# Set up fzf key bindings and fuzzy completion
-source <(fzf --zsh)
-bindkey -s '^F' "tmux-git-sessionizer\n"
+# Set up fzf key bindings and fuzzy completion (if fzf is available)
+if command -v fzf >/dev/null 2>&1; then
+  source <(fzf --zsh)
+  # Bind Ctrl-F to tmux-sessionizer if it exists
+  if command -v tmux-sessionizer >/dev/null 2>&1; then
+    bindkey -s '^F' "tmux-sessionizer\n"
+  fi
+fi
 
 #determines search program for fzf
 if type ag &> /dev/null; then
@@ -89,22 +90,27 @@ fi
 # cd /Users/ryenbeatty/Code/
 alias reload!='source ~/.zshrc'
 
-# Auto-start tmux session when entering project directories
+# Auto-start tmux session when entering project directories (if tmux is available)
 cd() {
     builtin cd "$@" || return
-    
+
+    # Only proceed if tmux is installed
+    if ! command -v tmux >/dev/null 2>&1; then
+        return
+    fi
+
     # Only activate for git repositories or directories with specific files
     if [[ -d .git ]] || [[ -f package.json ]] || [[ -f Cargo.toml ]]; then
         # Only run if we're not already in tmux
         if [[ -z "$TMUX" ]]; then
             session_name=$(basename "$PWD" | tr . _)
-            
+
             # Check if session exists
             if ! tmux has-session -t="$session_name" 2> /dev/null; then
                 # Create new session in background
                 tmux new-session -d -s "$session_name"
             fi
-            
+
             # Attach to the session
             tmux attach-session -t "$session_name"
         fi

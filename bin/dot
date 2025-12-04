@@ -44,12 +44,22 @@ export ZSH=$HOME/.dotfiles
 # $ZSH/macos/set-defaults.sh
 
 # Install homebrew
-$ZSH/homebrew/install.sh 2>&1
+if [ -f "$ZSH/homebrew/install.sh" ]; then
+  $ZSH/homebrew/install.sh 2>&1
+fi
 
-# Upgrade homebrew
-echo "› brew update"
-brew update
+# Upgrade homebrew (if available)
+if command -v brew >/dev/null 2>&1; then
+  echo "› brew update"
+  brew update
+else
+  echo "› Homebrew not found, skipping update"
+fi
 
 # Install software
-echo "› $ZSH/script/install"
-$ZSH/script/install
+if [ -f "$ZSH/script/install" ]; then
+  echo "› $ZSH/script/install"
+  $ZSH/script/install
+else
+  echo "› Install script not found, skipping"
+fi

@@ -2,9 +2,20 @@
 #
 # Run all dotfiles installers.
 
-set -e
+set -euo pipefail
 
-cd "$(dirname $0)"/..
+cd "$(dirname "$0")/.."
 
 # find the installers and run them iteratively
-find . -name install.sh | while read installer ; do sh -c "${installer}" ; done
+if ! find . -name install.sh -print0 | while IFS= read -r -d '' installer; do
+  echo "Running installer: $installer"
+  if ! bash "$installer"; then
+    echo "Failed to run installer: $installer"
+    exit 1
+  fi
+done; then
+  echo "Some installers failed"
+  exit 1
+fi
+
+echo "All installers completed successfully"
