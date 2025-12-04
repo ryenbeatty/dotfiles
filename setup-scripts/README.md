@@ -23,10 +23,10 @@ For the latest work laptop setup (December 2025):
 ```bash
 cd ~/.dotfiles/setup-scripts/work-laptop-december-2025
 
-# Install software packages
+# Install software packages (automatically installs Homebrew if needed)
 ./homebrew-packages.sh
 
-# Setup development environments
+# Setup development environments (automatically installs Homebrew if needed)
 ./development-tools.sh
 
 # Configure macOS system preferences

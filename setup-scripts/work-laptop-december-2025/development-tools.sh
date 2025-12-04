@@ -17,6 +17,40 @@ error() {
     echo -e "\033[0;31m[ERROR]\033[0m $1"
 }
 
+# Install Homebrew if not already installed
+install_homebrew() {
+    if ! command -v brew >/dev/null 2>&1; then
+        info "Homebrew not found. Installing Homebrew..."
+
+        # Download and run the official Homebrew installation script
+        if /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"; then
+            success "Homebrew installed successfully"
+
+            # Add Homebrew to PATH for the current session
+            if [[ -f "/opt/homebrew/bin/brew" ]]; then
+                # Apple Silicon Mac
+                eval "$(/opt/homebrew/bin/brew shellenv)"
+                info "Added Homebrew to PATH (Apple Silicon)"
+            elif [[ -f "/usr/local/bin/brew" ]]; then
+                # Intel Mac
+                eval "$(/usr/local/bin/brew shellenv)"
+                info "Added Homebrew to PATH (Intel)"
+            fi
+
+            # Verify installation
+            if command -v brew >/dev/null 2>&1; then
+                success "Homebrew is now available at $(command -v brew)"
+            else
+                error "Homebrew installation completed but 'brew' command not found in PATH"
+                error "You may need to restart your terminal"
+            fi
+        else
+            error "Failed to install Homebrew automatically"
+            info "Some development tools require Homebrew and may fail to install"
+        fi
+    fi
+}
+
 # Install Node.js via NVM
 install_nodejs() {
     info "Setting up Node.js via NVM..."
@@ -173,6 +207,7 @@ main() {
     echo "🛠️  Development Tools Installation"
     echo "=================================="
 
+    install_homebrew
     install_nodejs
     install_python_tools
     install_bun

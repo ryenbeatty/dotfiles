@@ -7,21 +7,23 @@ This directory contains scripts to automate the setup of a new macOS work laptop
 For a complete new machine setup, run these scripts in order:
 
 ```bash
-# 1. Install Homebrew packages (CLI tools and GUI apps)
+# 1. Install Homebrew packages (automatically installs Homebrew if needed)
 ./homebrew-packages.sh
 
-# 2. Set up development environments
+# 2. Set up development environments (automatically installs Homebrew if needed)
 ./development-tools.sh
 
 # 3. Configure macOS system preferences
 ./macos-settings.sh
 ```
 
+**Note:** Both scripts now automatically install Homebrew if it's not present, so you can run them on a completely fresh macOS installation.
+
 ## 📋 Individual Scripts
 
 ### 🍺 homebrew-packages.sh
 
-Installs software packages discovered on the current system via Homebrew.
+Automatically installs Homebrew (if needed) and then installs software packages discovered on the current system via Homebrew.
 
 **Usage:**
 ```bash
@@ -66,7 +68,7 @@ Installs software packages discovered on the current system via Homebrew.
 
 ### 🛠️ development-tools.sh
 
-Sets up development environments for multiple programming languages.
+Automatically installs Homebrew (if needed) and sets up development environments for multiple programming languages.
 
 **What it installs:**
 - **Node.js** via NVM (latest LTS)
