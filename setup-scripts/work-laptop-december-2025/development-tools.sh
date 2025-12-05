@@ -17,6 +17,10 @@ error() {
     echo -e "\033[0;31m[ERROR]\033[0m $1"
 }
 
+warning() {
+    echo -e "\033[1;33m[WARNING]\033[0m $1"
+}
+
 # Install Homebrew if not already installed
 install_homebrew() {
     if ! command -v brew >/dev/null 2>&1; then
@@ -84,22 +88,50 @@ install_python_tools() {
     # Install pyenv if not already installed
     if ! command -v pyenv >/dev/null 2>&1; then
         if command -v brew >/dev/null 2>&1; then
+            info "Installing pyenv via Homebrew..."
             brew install pyenv
         else
+            info "Installing pyenv via curl..."
             curl https://pyenv.run | bash
         fi
+
+        # Add pyenv to PATH for this session immediately after installation
+        export PATH="$HOME/.pyenv/bin:$PATH"
+        eval "$(pyenv init --path)" 2>/dev/null || true
+        eval "$(pyenv init -)" 2>/dev/null || true
     fi
 
     # Install latest Python versions
     if command -v pyenv >/dev/null 2>&1; then
         info "Installing Python 3.12..."
-        pyenv install 3.12.7 || true  # Don't fail if already installed
+
+        # Add pyenv to PATH for this session
+        export PATH="$HOME/.pyenv/bin:$PATH"
+        eval "$(pyenv init --path)" 2>/dev/null || true
+        eval "$(pyenv init -)" 2>/dev/null || true
+
+        # Install Python 3.12 if not already installed
+        if ! pyenv versions | grep -q "3.12.7"; then
+            pyenv install 3.12.7
+        fi
         pyenv global 3.12.7
 
-        # Install essential Python packages
-        pip install --user --upgrade pip
-        pip install --user uv  # Fast package manager
+        # Refresh pyenv shims
+        pyenv rehash
+
+        # Install essential Python packages using pyenv's Python
+        if command -v pip >/dev/null 2>&1; then
+            info "Installing Python packages..."
+            pip install --upgrade pip
+            pip install uv  # Fast package manager
+            success "Python packages installed"
+        else
+            warning "pip not available after pyenv setup, skipping Python packages"
+        fi
+
         success "Python development environment configured"
+    else
+        warning "pyenv not available, skipping Python setup"
     fi
 }
 
