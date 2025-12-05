@@ -31,49 +31,13 @@ error() {
     echo -e "${RED}[ERROR]${NC} $1"
 }
 
-# Install Homebrew if not already installed
-install_homebrew() {
-    if ! command -v brew >/dev/null 2>&1; then
-        info "Homebrew not found. Installing Homebrew..."
-
-        # Download and run the official Homebrew installation script
-        if /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"; then
-            success "Homebrew installed successfully"
-
-            # Add Homebrew to PATH for the current session
-            if [[ -f "/opt/homebrew/bin/brew" ]]; then
-                # Apple Silicon Mac
-                eval "$(/opt/homebrew/bin/brew shellenv)"
-                info "Added Homebrew to PATH (Apple Silicon)"
-            elif [[ -f "/usr/local/bin/brew" ]]; then
-                # Intel Mac
-                eval "$(/usr/local/bin/brew shellenv)"
-                info "Added Homebrew to PATH (Intel)"
-            fi
-
-            # Verify installation
-            if command -v brew >/dev/null 2>&1; then
-                success "Homebrew is now available at $(command -v brew)"
-            else
-                error "Homebrew installation completed but 'brew' command not found in PATH"
-                error "You may need to restart your terminal or run:"
-                echo "  eval \"\$(brew shellenv)\""
-                exit 1
-            fi
-        else
-            error "Failed to install Homebrew"
-            error "Please install manually:"
-            echo "  /bin/bash -c \"\$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)\""
-            exit 1
-        fi
-    else
-        success "Homebrew already installed at $(command -v brew)"
-    fi
-}
-
-# Check and install Homebrew
+# Check that Homebrew is available
 check_homebrew() {
-    install_homebrew
+    if ! command -v brew >/dev/null 2>&1; then
+        error "Homebrew is not installed. Please run script/bootstrap first, which will install Homebrew."
+        exit 1
+    fi
+    success "Homebrew found at $(command -v brew)"
 }
 
 # Install CLI tools and libraries

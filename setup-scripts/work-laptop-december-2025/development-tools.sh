@@ -21,38 +21,14 @@ warning() {
     echo -e "\033[1;33m[WARNING]\033[0m $1"
 }
 
-# Install Homebrew if not already installed
-install_homebrew() {
+# Check that Homebrew is available for tools that need it
+check_homebrew() {
     if ! command -v brew >/dev/null 2>&1; then
-        info "Homebrew not found. Installing Homebrew..."
-
-        # Download and run the official Homebrew installation script
-        if /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"; then
-            success "Homebrew installed successfully"
-
-            # Add Homebrew to PATH for the current session
-            if [[ -f "/opt/homebrew/bin/brew" ]]; then
-                # Apple Silicon Mac
-                eval "$(/opt/homebrew/bin/brew shellenv)"
-                info "Added Homebrew to PATH (Apple Silicon)"
-            elif [[ -f "/usr/local/bin/brew" ]]; then
-                # Intel Mac
-                eval "$(/usr/local/bin/brew shellenv)"
-                info "Added Homebrew to PATH (Intel)"
-            fi
-
-            # Verify installation
-            if command -v brew >/dev/null 2>&1; then
-                success "Homebrew is now available at $(command -v brew)"
-            else
-                error "Homebrew installation completed but 'brew' command not found in PATH"
-                error "You may need to restart your terminal"
-            fi
-        else
-            error "Failed to install Homebrew automatically"
-            info "Some development tools require Homebrew and may fail to install"
-        fi
+        warning "Homebrew not found. Some tools (Go, Java, databases) may not install."
+        warning "Run script/bootstrap first to install Homebrew."
+        return 1
     fi
+    return 0
 }
 
 # Install Node.js via NVM
@@ -164,7 +140,7 @@ install_rust() {
 install_go() {
     info "Installing Go..."
 
-    if command -v brew >/dev/null 2>&1; then
+    if check_homebrew; then
         if ! brew list | grep -q "^go$"; then
             brew install go
             success "Go installed via Homebrew"
@@ -172,7 +148,7 @@ install_go() {
             success "Go already installed"
         fi
     else
-        error "Homebrew not found, please install Go manually"
+        info "Skipping Go installation (Homebrew required)"
     fi
 }
 
@@ -180,13 +156,15 @@ install_go() {
 install_java() {
     info "Installing Java..."
 
-    if command -v brew >/dev/null 2>&1; then
+    if check_homebrew; then
         if ! brew list --cask | grep -q "temurin"; then
             brew install --cask temurin
             success "Java (Temurin) installed"
         else
             success "Java already installed"
         fi
+    else
+        info "Skipping Java installation (Homebrew required)"
     fi
 }
 
@@ -194,8 +172,8 @@ install_java() {
 install_databases() {
     info "Installing development databases..."
 
-    if command -v brew >/dev/null 2>&1; then
-        local dbs=("postgresql" "redis" "sqlite")
+    if check_homebrew; then
+        local dbs=("postgresql" "redis")  # sqlite comes with macOS
 
         for db in "${dbs[@]}"; do
             if ! brew list | grep -q "^${db}$"; then
@@ -205,6 +183,8 @@ install_databases() {
                 success "$db already installed"
             fi
         done
+    else
+        info "Skipping database installation (Homebrew required)"
     fi
 }
 
@@ -239,7 +219,7 @@ main() {
     echo "🛠️  Development Tools Installation"
     echo "=================================="
 
-    install_homebrew
+    check_homebrew
     install_nodejs
     install_python_tools
     install_bun
