@@ -288,7 +288,7 @@ EOF
 
 # Main function
 main() {
-    local install_type="${1:-all}"
+    local install_type="${1:-}"
 
     echo "🍺 Homebrew Package Installation Script"
     echo "======================================"

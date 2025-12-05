@@ -157,25 +157,3 @@ then
 fi
 echo ''
 echo '  All installed!'
-```
-
-**Key changes:**
-
-1. Added `install_config_files()` function that:
-   - Creates `~/.config` if it doesn't exist
-   - Finds all directories in `$DOTFILES_ROOT/config/`
-   - Symlinks each one to `~/.config/` using your existing `link_file` function
-   - Reuses the same overwrite/backup/skip logic for consistency
-
-2. Called `install_config_files` after `install_dotfiles`
-
-**Usage:**
-Just create a `config/` directory in your dotfiles repo and add your app configs:
-```
-~/.dotfiles/
-├── config/
-│   ├── nvim/
-│   ├── alacritty/
-│   ├── yabai/
-│   └── skhd/
-└── bootstrap
