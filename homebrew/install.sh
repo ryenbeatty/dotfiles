@@ -45,7 +45,9 @@ brew install --quiet \
   jq \
   gh \
   grc \
-  coreutils
+  coreutils \
+  yabai \
+  skhd
 
 # Install GUI applications
 echo "Installing GUI applications..."
