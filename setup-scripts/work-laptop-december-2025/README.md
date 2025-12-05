@@ -7,23 +7,29 @@ This directory contains scripts to automate the setup of a new macOS work laptop
 For a complete new machine setup, run these scripts in order:
 
 ```bash
-# 1. Install Homebrew packages (automatically installs Homebrew if needed)
+# Run this FIRST to install Homebrew and symlink dotfiles
+cd ~/.dotfiles && script/bootstrap
+
+# Then run setup scripts:
+cd ~/.dotfiles/setup-scripts/work-laptop-december-2025
+
+# 1. Install software packages (requires Homebrew from bootstrap)
 ./homebrew-packages.sh
 
-# 2. Set up development environments (automatically installs Homebrew if needed)
+# 2. Set up development environments
 ./development-tools.sh
 
 # 3. Configure macOS system preferences
 ./macos-settings.sh
 ```
 
-**Note:** Both scripts now automatically install Homebrew if it's not present, so you can run them on a completely fresh macOS installation.
+**Note:** You must run `script/bootstrap` first as it installs Homebrew and sets up your dotfiles. The setup scripts depend on this.
 
 ## 📋 Individual Scripts
 
 ### 🍺 homebrew-packages.sh
 
-Automatically installs Homebrew (if needed) and then installs software packages discovered on the current system via Homebrew.
+Installs software packages via Homebrew. Requires Homebrew to be installed first (via `script/bootstrap`).
 
 **Usage:**
 ```bash
@@ -68,7 +74,7 @@ Automatically installs Homebrew (if needed) and then installs software packages 
 
 ### 🛠️ development-tools.sh
 
-Automatically installs Homebrew (if needed) and sets up development environments for multiple programming languages.
+Sets up development environments for multiple programming languages. Some tools require Homebrew (installed via `script/bootstrap`).
 
 **What it installs:**
 - **Node.js** via NVM (latest LTS)
