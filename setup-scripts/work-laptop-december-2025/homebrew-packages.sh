@@ -58,8 +58,8 @@ install_cli_tools() {
         # System utilities
         "mas"                  # Mac App Store CLI
         "neofetch"            # System information
-        "skhd"                # Hotkey daemon
-        "yabai"               # Tiling window manager
+        "koekeishiya/formulae/skhd"    # Hotkey daemon
+        "koekeishiya/formulae/yabai"   # Tiling window manager
         "tmux"                # Terminal multiplexer
 
         # Development languages and runtimes

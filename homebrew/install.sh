@@ -45,9 +45,12 @@ brew install --quiet \
   jq \
   gh \
   grc \
-  coreutils \
-  yabai \
-  skhd
+  coreutils
+
+# Install window management tools from koekeishiya tap
+echo "Installing window management tools..."
+brew install --quiet koekeishiya/formulae/yabai
+brew install --quiet koekeishiya/formulae/skhd
 
 # Install GUI applications
 echo "Installing GUI applications..."
