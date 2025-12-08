@@ -121,3 +121,4 @@ alias gittail='watch -n 1 -c "git log --graph --pretty=format:'"'"'%Cred%h%Crese
 
 alias notify='afplay /System/Library/Sounds/Funk.aiff'
 
+export PATH="$HOME/.local/bin:$PATH"
