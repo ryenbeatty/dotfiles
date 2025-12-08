@@ -58,4 +58,8 @@ brew install --cask --quiet \
   alacritty \
   visual-studio-code
 
+# Install fonts
+echo "Installing fonts..."
+brew install --cask --quiet font-blex-mono-nerd-font
+
 echo "Homebrew installation complete!"
