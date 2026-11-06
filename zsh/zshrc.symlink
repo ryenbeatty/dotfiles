@@ -38,8 +38,19 @@ do
 done
 
 # initialize autocomplete here, otherwise functions won't be loaded
-autoload -U compinit
-compinit
+autoload -Uz compinit
+ZCOMPDUMP="${ZDOTDIR:-$HOME}/.zcompdump"
+if [[ -n ${ZDOTDIR:-$HOME}/.zcompdump(#qN.mh+24) ]]; then
+  # missing or older than 24h: rebuild the dump and re-run the security audit
+  compinit -d "$ZCOMPDUMP"
+  # byte-compile it so subsequent shells load the table instead of parsing it
+  zcompile "$ZCOMPDUMP" 2>/dev/null
+else
+  # fresh enough: trust the cache and skip the audit, which is a big part of
+  # the startup cost. Regenerated automatically within a day.
+  compinit -C -d "$ZCOMPDUMP"
+fi
+unset ZCOMPDUMP
 
 # load every completion after autocomplete loads
 for file in ${(M)config_files:#*/completion.zsh}
@@ -77,6 +88,20 @@ if command -v fzf >/dev/null 2>&1; then
     bindkey -s '^F' "tmux-sessionizer\n"
   fi
 fi
+
+# zsh-autosuggestions: grey inline completion from history.
+# zsh-syntax-highlighting: must be sourced after every other zle setup, i.e.
+# after the bindkey calls above, or its highlighters get clobbered.
+# Both were cloned into ~/.oh-my-zsh/custom but oh-my-zsh itself is not used
+# here (ZSH points at ~/.dotfiles), so nothing was loading them.
+_zsh_plugins="$HOME/.oh-my-zsh/custom/plugins"
+if [[ -f $_zsh_plugins/zsh-autosuggestions/zsh-autosuggestions.zsh ]]; then
+  source $_zsh_plugins/zsh-autosuggestions/zsh-autosuggestions.zsh
+fi
+if [[ -f $_zsh_plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh ]]; then
+  source $_zsh_plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
+fi
+unset _zsh_plugins
 
 #determines search program for fzf
 if type ag &> /dev/null; then
