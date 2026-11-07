@@ -126,6 +126,62 @@ if [[ -d $HOME/.codex ]] && ! command -v codex >/dev/null 2>&1; then
   run trash "$HOME/.codex"
 fi
 
+hr "python toolchain: pyenv + rye + conda -> uv"
+# Five Python sources were installed; the shell resolved to the worst one. uv is
+# the keeper (python/install.sh, config/uv/uv.toml).
+if [[ -d $HOME/.pyenv ]]; then
+  run du -sh "$HOME/.pyenv"
+  # one global 3.12.4 with 276 packages installed straight into it -- keep a
+  # record before it goes, in case some CLI turns out to be needed
+  if command -v pyenv >/dev/null 2>&1; then
+    run sh -c "pyenv exec pip freeze > '$BK/pyenv-3.12.4-freeze.txt'"
+  fi
+  run trash "$HOME/.pyenv"
+fi
+
+# rye: `use-uv = true` + `global-python = true` made it a wrapper over uv whose
+# shims were only ever exported from ~/.profile (bash login shells).
+if [[ -d $HOME/.rye ]]; then
+  run trash "$HOME/.rye"
+  if grep -q 'rye/env' "$HOME/.profile" 2>/dev/null; then
+    run cp "$HOME/.profile" "$HOME/.profile.bak"
+    run sed -i '' '/\. "\$HOME\/\.rye\/env"/d' "$HOME/.profile"
+  fi
+fi
+
+# conda: miniconda cask with a leftover pytorch/ComfyUI env, initialised only in
+# ~/.bash_profile. Drop the whole thing if comfyenv is no longer wanted.
+if [[ -d $HOME/.conda ]]; then
+  run du -sh "$HOME/.conda"
+  run trash "$HOME/.conda"
+  if grep -q 'conda initialize' "$HOME/.bash_profile" 2>/dev/null; then
+    run cp "$HOME/.bash_profile" "$HOME/.bash_profile.bak"
+    run sed -i '' '/# >>> conda initialize >>>/,/# <<< conda initialize <<</d' "$HOME/.bash_profile"
+  fi
+fi
+
+# managers themselves, and the two Homebrew pythons nothing was using
+run brew uninstall pyenv pyenv-virtualenv
+run brew uninstall python@3.12 python@3.15
+run brew uninstall --cask miniconda
+
+# uv itself: switch from the standalone installer to the formula. Its receipt
+# blocks config/uv being a symlink into the repo, and its ~/.local/bin/uv would
+# shadow brew's (that dir comes first on PATH) -- so install, then drop it.
+if command -v brew >/dev/null 2>&1; then
+  run brew install --quiet uv
+fi
+[[ -f $HOME/.local/bin/uv ]] && run trash "$HOME/.local/bin/uv"
+[[ -f $HOME/.local/bin/uvx ]] && run trash "$HOME/.local/bin/uvx"
+[[ -d $HOME/.config/uv ]] && run trash "$HOME/.config/uv"
+
+# uv hygiene: stale 3.11 alias, and the 4.4G cache (prune is conservative --
+# `uv cache clean` reclaims all of it)
+if command -v uv >/dev/null 2>&1; then
+  run uv python uninstall 3.11
+  run uv cache prune
+fi
+
 # ----------------------------------------------------------------- 4. skills
 hr "skill harness links"
 # One tree (~/.dotfiles/skills, symlinked as ~/.agents/skills) for every
