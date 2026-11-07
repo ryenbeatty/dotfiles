@@ -1,7 +1,11 @@
-# Prompt: branch name coloured by dirty state, plus an unpushed-commit count.
+# Prompt: <dir> on <branch> ↑<unpushed>, then a chevron line.
 # Original by @ehrenmurdick, http://github.com/ehrenmurdick/config/blob/master/zsh/prompt.zsh
+#
+# Colour uses only native prompt escapes (%F{name} / %f), deliberately NOT
+# $fg[...] or $reset_color: those come from `autoload colors`, and dropping that
+# call silently strips every colour from the prompt (regression in 4026738).
+# %8 is bright black, used for the muted "on" / chevron.
 
-# Branch name, or empty when not on a branch (detached HEAD).
 git_branch() {
   local ref
   ref=$(command git symbolic-ref --short HEAD 2>/dev/null) || return
@@ -12,9 +16,9 @@ git_dirty() {
   local branch
   branch=$(git_branch) || return
   if [[ -z "$(command git status --porcelain 2>/dev/null)" ]]; then
-    print -r -- "on %{$fg_bold[green]%}$branch%{$reset_color%}"
+    print -r -- "%F{8}on%f %B%F{green}$branch%f%b"
   else
-    print -r -- "on %{$fg_bold[red]%}$branch%{$reset_color%}"
+    print -r -- "%F{8}on%f %B%F{red}$branch%f%b"
   fi
 }
 
@@ -23,12 +27,12 @@ git_dirty() {
 need_push() {
   local count
   count=$(command git rev-list --count '@{upstream}..HEAD' 2>/dev/null) || return
-  (( count == 0 )) || print -r -- " with %{$fg_bold[magenta]%}$count unpushed%{$reset_color%}"
+  (( count == 0 )) || print -r -- " %F{yellow}↑$count%f"
 }
 
 directory_name() {
-  print -r -- "%{$fg_bold[cyan]%}%1/%\/%{$reset_color%}"
+  print -r -- "%B%F{cyan}%1/%\/%f%b"
 }
 
-PROMPT=$'\n$(directory_name) $(git_dirty)$(need_push)\n› '
+PROMPT=$'\n$(directory_name) $(git_dirty)$(need_push)\n%F{8}❯%f '
 RPROMPT=''
