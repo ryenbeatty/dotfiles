@@ -1,7 +1,6 @@
-# Node versions provisioned by fnm (node/install.sh). One per line.
-# The FIRST entry becomes the fnm default, i.e. `node` outside any project.
-# These match the .nvmrc files in ~/Code: scout + ReactTube want 24,
-# kestra/ui wants 22.18 -- and Homebrew's single node 26 is outside
-# scout's "engines": ">=24 <25".
+# Node versions to pre-install with mise (node/install.sh). One per line.
+# The global default comes from config/mise/config.toml ("24"); the extra entry
+# exists so a project that asks for it (kestra/ui's .nvmrc) does not have to
+# download a runtime on first `cd`.
 24
 22.18

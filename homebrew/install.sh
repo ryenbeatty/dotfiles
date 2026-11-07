@@ -35,7 +35,9 @@ brew update
 echo "Installing essential packages..."
 # Python is uv's job (python/install.sh): no pyenv, and no python@X formulae,
 # so `python3` cannot end up ambiguous between a shim, a cask and a formula.
-# Node versions are fnm's job (node/install.sh), not Homebrew's `node`.
+# Node versions are mise's job (node/install.sh, config/mise/config.toml),
+# not Homebrew's `node` -- though `node` stays installed because neonctl and
+# prettierd depend on it.
 brew install --quiet \
   uv \
   fzf \

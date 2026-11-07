@@ -1,0 +1,17 @@
+# mise global config, linked to ~/.config/mise/config.toml by script/bootstrap.
+#
+# Node versions live here; Python does NOT (it is uv's job -- see
+# config/uv/uv.toml and python/install.sh). mise is deliberately scoped to Node
+# so the two managers do not overlap.
+
+[tools]
+# default for directories that do not ask for something else
+node = "24"
+
+[settings]
+# mise ignores .nvmrc / .node-version unless a tool is listed here. Enabling it
+# for node is what makes the existing files work:
+#   ~/Code/scout/.nvmrc      24
+#   ~/Code/ReactTube/.nvmrc  24
+#   ~/Code/kestra/ui/.nvmrc  22.18
+idiomatic_version_file_enable_tools = ["node"]

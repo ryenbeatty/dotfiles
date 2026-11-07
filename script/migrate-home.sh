@@ -188,8 +188,9 @@ if command -v uv >/dev/null 2>&1; then
 fi
 
 # ----------------------------------------------------------------- 4. node
-hr "node: fnm + corepack"
-# fnm takes over version switching (node/install.sh). Two leftovers to tidy:
+hr "node: mise version switching"
+# mise takes over version switching (node/install.sh, config/mise/config.toml).
+# Two leftovers to tidy:
 # a mixed .nvmrc spelling, and the record of what is welded to the Homebrew node.
 if [[ -f $HOME/Code/ReactTube/.nvmrc ]] && grep -qx 'v24' "$HOME/Code/ReactTube/.nvmrc" 2>/dev/null; then
   run cp "$HOME/Code/ReactTube/.nvmrc" "$BK/ReactTube.nvmrc.bak"
@@ -197,7 +198,7 @@ if [[ -f $HOME/Code/ReactTube/.nvmrc ]] && grep -qx 'v24' "$HOME/Code/ReactTube/
 fi
 
 # Global npm packages live inside the Homebrew node install, so record them
-# before anything touches it (they need reinstalling under fnm's versions).
+# before anything touches it (they need reinstalling under mise's node).
 if command -v npm >/dev/null 2>&1; then
   run sh -c "npm ls -g --depth=0 > '$BK/npm-globals.txt' 2>&1 || true"
 fi
