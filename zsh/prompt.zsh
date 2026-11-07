@@ -1,77 +1,34 @@
-autoload colors && colors
-# cheers, @ehrenmurdick
-# http://github.com/ehrenmurdick/config/blob/master/zsh/prompt.zsh
+# Prompt: branch name coloured by dirty state, plus an unpushed-commit count.
+# Original by @ehrenmurdick, http://github.com/ehrenmurdick/config/blob/master/zsh/prompt.zsh
 
-if (( $+commands[git] ))
-then
-  git="$commands[git]"
-else
-  git="/usr/bin/git"
-fi
-
+# Branch name, or empty when not on a branch (detached HEAD).
 git_branch() {
-  echo $($git symbolic-ref HEAD 2>/dev/null | awk -F/ {'print $NF'})
+  local ref
+  ref=$(command git symbolic-ref --short HEAD 2>/dev/null) || return
+  print -r -- "$ref"
 }
 
 git_dirty() {
-  if $(! $git status -s &> /dev/null)
-  then
-    echo ""
+  local branch
+  branch=$(git_branch) || return
+  if [[ -z "$(command git status --porcelain 2>/dev/null)" ]]; then
+    print -r -- "on %{$fg_bold[green]%}$branch%{$reset_color%}"
   else
-    if [[ $($git status --porcelain) == "" ]]
-    then
-      echo "on %{$fg_bold[green]%}$(git_prompt_info)%{$reset_color%}"
-    else
-      echo "on %{$fg_bold[red]%}$(git_prompt_info)%{$reset_color%}"
-    fi
+    print -r -- "on %{$fg_bold[red]%}$branch%{$reset_color%}"
   fi
 }
 
-git_prompt_info () {
- ref=$($git symbolic-ref HEAD 2>/dev/null) || return
-# echo "(%{\e[0;33m%}${ref#refs/heads/}%{\e[0m%})"
- echo "${ref#refs/heads/}"
-}
-
-# This assumes that you always have an origin named `origin`, and that you only
-# care about one specific origin. If this is not the case, you might want to use
-# `$git cherry -v @{upstream}` instead.
-need_push () {
-  if [ $($git rev-parse --is-inside-work-tree 2>/dev/null) ]
-  then
-    number=$($git cherry -v origin/$(git symbolic-ref --short HEAD) 2>/dev/null | wc -l | bc)
-
-    if [[ $number == 0 ]]
-    then
-      echo " "
-    else
-      echo " with %{$fg_bold[magenta]%}$number unpushed%{$reset_color%}"
-    fi
-  fi
+# Uses @{upstream}, so it stays correct when the branch is not called `origin/HEAD`.
+# (The old version shelled out to `git cherry | wc -l | bc` for this.)
+need_push() {
+  local count
+  count=$(command git rev-list --count '@{upstream}..HEAD' 2>/dev/null) || return
+  (( count == 0 )) || print -r -- " with %{$fg_bold[magenta]%}$count unpushed%{$reset_color%}"
 }
 
 directory_name() {
-  echo "%{$fg_bold[cyan]%}%1/%\/%{$reset_color%}"
+  print -r -- "%{$fg_bold[cyan]%}%1/%\/%{$reset_color%}"
 }
 
-battery_status() {
-  if test ! "$(uname)" = "Darwin"
-  then
-    exit 0
-  fi
-
-  if [[ $(sysctl -n hw.model) == *"Book"* ]]
-  then
-    $ZSH/bin/battery-status
-  fi
-}
-
-export PROMPT=$'\n$(directory_name) $(git_dirty)$(need_push)\n› '
-
-set_prompt () {
-  export RPROMPT="%{$fg_bold[cyan]%}%{$reset_color%}"
-}
-
-precmd() {
-  set_prompt
-}
+PROMPT=$'\n$(directory_name) $(git_dirty)$(need_push)\n› '
+RPROMPT=''

@@ -1,1 +1,10 @@
 export EDITOR='nvim'
+
+# pi quiet-tools: how much command output the agent is shown.
+export QUIET_TOOLS_MAX_CHARS=4000
+export QUIET_TOOLS_MAX_LINE_CHARS=200
+export QUIET_TOOLS_MAX_LINES=150
+export QUIET_TOOLS_HEAD_LINES=30
+export QUIET_TOOLS_TAIL_LINES=15
+export QUIET_TOOLS_ERROR_HEAD_LINES=40
+export QUIET_TOOLS_ERROR_TAIL_LINES=25

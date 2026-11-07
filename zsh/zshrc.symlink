@@ -4,10 +4,6 @@ fi
 
 printf "\e[?1042l"
 
-export PATH="$PATH:$HOME/.local/scripts"
-
-
-# shortcut to this dotfiles path is $ZSH
 export ZSH=$HOME/.dotfiles
 
 # your project folder that we can `c [tab]` to
@@ -24,6 +20,10 @@ fi
 # all of our zsh files
 typeset -U config_files
 config_files=($ZSH/**/*.zsh)
+# ...except vendored third-party plugins, which are sourced explicitly further
+# down. Their tests/ and highlighters/ are *.zsh files too, and the glob used to
+# execute them as if they were topic files.
+config_files=(${config_files:#$ZSH/zsh/plugins/*})
 
 # load the path files
 for file in ${(M)config_files:#*/path.zsh}
@@ -62,26 +62,28 @@ unset config_files
 
 # Better history
 # Credits to https://coderwall.com/p/jpj_6q/zsh-better-history-searching-with-arrow-keys
+# Guarded on a real terminal: `zsh -i -c` gets the `zle` option but no line
+# editor, and `zle -N` there just prints "can't change option: zle".
 autoload -U up-line-or-beginning-search
 autoload -U down-line-or-beginning-search
-zle -N up-line-or-beginning-search
-zle -N down-line-or-beginning-search
-bindkey "^[[A" up-line-or-beginning-search # Up
-bindkey "^[[B" down-line-or-beginning-search # Down
+if [[ -t 0 ]]; then
+  zle -N up-line-or-beginning-search
+  zle -N down-line-or-beginning-search
+  bindkey "^[[A" up-line-or-beginning-search # Up
+  bindkey "^[[B" down-line-or-beginning-search # Down
+fi
 
-# Load NVM if available
-export NVM_DIR="$HOME/.nvm"
-[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
-[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
-
-
+# nvm is loaded lazily from nvm/path.zsh -- the eager load that used to live
+# here defeated it and cost ~200ms of startup time.
 export GPG_TTY=$(tty)
 
 
 alias v="nvim"
 
-# Set up fzf key bindings and fuzzy completion (if fzf is available)
-if command -v fzf >/dev/null 2>&1; then
+# Set up fzf key bindings and fuzzy completion (if fzf is available).
+# Guarded on `zle`: `fzf --zsh` binds keys, which fails in a shell without a
+# line editor (e.g. `zsh -i -c exit`).
+if [[ -t 0 ]] && command -v fzf >/dev/null 2>&1; then
   source <(fzf --zsh)
   # Bind Ctrl-F to tmux-sessionizer if it exists
   if command -v tmux-sessionizer >/dev/null 2>&1; then
@@ -92,16 +94,44 @@ fi
 # zsh-autosuggestions: grey inline completion from history.
 # zsh-syntax-highlighting: must be sourced after every other zle setup, i.e.
 # after the bindkey calls above, or its highlighters get clobbered.
-# Both were cloned into ~/.oh-my-zsh/custom but oh-my-zsh itself is not used
-# here (ZSH points at ~/.dotfiles), so nothing was loading them.
-_zsh_plugins="$HOME/.oh-my-zsh/custom/plugins"
-if [[ -f $_zsh_plugins/zsh-autosuggestions/zsh-autosuggestions.zsh ]]; then
-  source $_zsh_plugins/zsh-autosuggestions/zsh-autosuggestions.zsh
-fi
-if [[ -f $_zsh_plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh ]]; then
-  source $_zsh_plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
+# Both are vendored in this repo and installed by script/bootstrap. They used to
+# be cloned into ~/.oh-my-zsh/custom, but oh-my-zsh itself is not used here
+# (ZSH points at ~/.dotfiles), so nothing was loading them.
+_zsh_plugins="$ZSH/zsh/plugins"
+if [[ -t 0 ]]; then
+  if [[ -f $_zsh_plugins/zsh-autosuggestions/zsh-autosuggestions.zsh ]]; then
+    source $_zsh_plugins/zsh-autosuggestions/zsh-autosuggestions.zsh
+  fi
+  if [[ -f $_zsh_plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh ]]; then
+    source $_zsh_plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
+  fi
 fi
 unset _zsh_plugins
+
+# --- TAB: take the grey inline suggestion, else complete ---------------------
+# zsh-autosuggestions accepts its history suggestion on → (forward-char) and
+# End. TAB is the completion key, so this widget picks: take the suggestion
+# when one is showing, complete when there isn't one.
+#
+# It has to be defined here, not in completion.zsh. `fzf --zsh` above binds ^I
+# to fzf-completion, so an earlier bindkey would be replaced (and fzf's `**`
+# trigger unreachable from TAB); autosuggestions also rebinds every widget it
+# doesn't ignore as a "modify" widget, which blanks POSTDISPLAY before calling
+# it -- a widget defined after the plugin, or named with a leading underscore
+# as this one is, is left alone. → keeps working; TAB is the addition.
+if [[ -t 0 ]]; then
+  _accept-suggestion-or-complete() {
+    if [[ -n $POSTDISPLAY && -n ${widgets[autosuggest-accept]} ]]; then
+      zle autosuggest-accept
+    elif [[ -n ${functions[fzf-completion]} ]]; then
+      zle fzf-completion      # keeps fzf's `**` fuzzy completion on TAB
+    else
+      zle expand-or-complete
+    fi
+  }
+  zle -N _accept-suggestion-or-complete
+  bindkey '^I' _accept-suggestion-or-complete
+fi
 
 #determines search program for fzf
 if type ag &> /dev/null; then
@@ -111,9 +141,6 @@ fi
 if type rg &> /dev/null; then
     export FZF_DEFAULT_COMMAND='rg --files --hidden'
 fi
-
-# cd /Users/ryenbeatty/Code/
-alias reload!='source ~/.zshrc'
 
 # Auto-start tmux session when entering project directories (if tmux is available)
 cd() {
@@ -126,8 +153,10 @@ cd() {
 
     # Only activate for git repositories or directories with specific files
     if [[ -d .git ]] || [[ -f package.json ]] || [[ -f Cargo.toml ]]; then
-        # Only run if we're not already in tmux
-        if [[ -z "$TMUX" ]]; then
+        # Only run if we're not already in tmux, and not inside a herdr pane: tmux
+        # does not carry HERDR_ENV/HERDR_PANE_ID/HERDR_SOCKET_PATH through, and
+        # herdr needs them to see the agent running in a pane.
+        if [[ -z "$TMUX" && -z "$HERDR_ENV" && -z "$HERDR_PANE_ID" ]]; then
             session_name=$(basename "$PWD" | tr . _)
 
             # Check if session exists
@@ -146,4 +175,7 @@ alias gittail='watch -n 1 -c "git log --graph --pretty=format:'"'"'%Cred%h%Crese
 
 alias notify='afplay /System/Library/Sounds/Funk.aiff'
 
-export PATH="$HOME/.local/bin:$PATH"
+if command -v wt >/dev/null 2>&1; then eval "$(command wt config shell init zsh)"; fi
+
+# PATH entries live in system/_path.zsh, tool env vars in system/env.zsh,
+# private keys in ~/.localrc, and aliases in zsh/aliases.zsh.
