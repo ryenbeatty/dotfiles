@@ -1,19 +1,17 @@
+# macOS
 .DS_Store
+
+# Editor / OS temp files
 *~
-*.swp
-.python-version
-###################
-.DS_Store
-.hg
-.svn
-*.vscode
-node_modules
-###################
-# Temporary files
-*.kate-swp
 *.swp
 *.swo
-*~
+*.kate-swp
+
+# Node
+node_modules
+
+# Editors
+*.vscode
 
 ##
 Mobile Documents

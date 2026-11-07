@@ -1,0 +1,320 @@
+{
+  "dialkitVersion": "2.0.0",
+  "purpose": "Reusable examples and suggested defaults; public adapter types are authoritative.",
+  "controlTypes": {
+    "slider": {
+      "description": "Numeric slider control",
+      "formats": [
+        {
+          "syntax": "[default, min, max]",
+          "example": "blur: [24, 0, 100]",
+          "description": "Explicit range tuple"
+        },
+        {
+          "syntax": "[default, min, max, step]",
+          "example": "scale: [1, 0.5, 2, 0.01]",
+          "description": "Explicit range and step; useful for fine scale adjustments"
+        },
+        {
+          "syntax": "number",
+          "example": "scale: 1.18",
+          "description": "Auto-inferred range based on value"
+        }
+      ],
+      "usage": "Returns number value directly: params.blur"
+    },
+    "toggle": {
+      "description": "Boolean on/off switch",
+      "formats": [
+        {
+          "syntax": "boolean",
+          "example": "visible: true",
+          "description": "Boolean value creates toggle"
+        }
+      ],
+      "usage": "Returns boolean: params.visible"
+    },
+    "spring": {
+      "description": "Transition editor with switchable Time, Physics, and Easing modes",
+      "formats": [
+        {
+          "syntax": "{ type: 'spring', visualDuration, bounce }",
+          "example": "spring: { type: 'spring', visualDuration: 0.3, bounce: 0.2 }",
+          "description": "Time mode - simpler, recommended for most cases"
+        },
+        {
+          "syntax": "{ type: 'spring', stiffness, damping, mass }",
+          "example": "spring: { type: 'spring', stiffness: 200, damping: 25, mass: 1 }",
+          "description": "Physics mode - more control over spring behavior"
+        }
+      ],
+      "usage": "Returns TransitionConfig (SpringConfig | EasingConfig), even when initialized as a spring. For Motion, convert type: 'easing' to { type: 'tween', duration, ease }; pass spring configs through.",
+      "defaults": {
+        "time": {"visualDuration": 0.3, "bounce": 0.2},
+        "physics": {"stiffness": 200, "damping": 25, "mass": 1}
+      }
+    },
+    "action": {
+      "description": "Button that triggers callback",
+      "formats": [
+        {
+          "syntax": "{ type: 'action' }",
+          "example": "reset: { type: 'action' }",
+          "description": "Basic action button using key as label"
+        },
+        {
+          "syntax": "{ type: 'action', label: string }",
+          "example": "next: { type: 'action', label: 'Next Slide' }",
+          "description": "Action with custom label"
+        }
+      ],
+      "usage": "Calls options.onAction with the full dot path, e.g. 'shadow.reset'. Wire real application handlers; actions are not writable values and setValues does not trigger them."
+    },
+    "select": {
+      "description": "Dropdown select control",
+      "formats": [
+        {
+          "syntax": "{ type: 'select', options: string[], default?: string }",
+          "example": "theme: { type: 'select', options: ['light', 'dark'], default: 'dark' }",
+          "description": "Simple string options"
+        },
+        {
+          "syntax": "{ type: 'select', options: { value, label }[] }",
+          "example": "size: { type: 'select', options: [{ value: 'sm', label: 'Small' }, { value: 'lg', label: 'Large' }] }",
+          "description": "Options with separate value and display label"
+        }
+      ],
+      "usage": "Returns selected value as string: params.theme"
+    },
+    "color": {
+      "description": "Color picker with Hex, OKLCH, Display P3, and alpha editing",
+      "formats": [
+        {
+          "syntax": "{ type: 'color', default?: string }",
+          "example": "bgColor: { type: 'color', default: '#3b82f6' }",
+          "description": "Explicit color config"
+        },
+        {
+          "syntax": "string (absolute CSS color)",
+          "example": "accent: 'oklch(0.7 0.2 145 / 0.8)'",
+          "description": "Auto-detects 3/4/6/8-digit hex, RGB, HSL, OKLCH, and Display P3. Use explicit color config for transparent; variables, named colors, relative colors, and calc() are not parsed."
+        }
+      ],
+      "usage": "Returns a CSS color string; bind it directly instead of assuming hex. Timeline interpolation has narrower color support than this picker."
+    },
+    "text": {
+      "description": "Text input that expands up to five lines, then scrolls; Enter adds a line break",
+      "formats": [
+        {
+          "syntax": "{ type: 'text', default?: string, placeholder?: string }",
+          "example": "title: { type: 'text', default: 'Hello', placeholder: 'Enter title...' }",
+          "description": "Explicit text config"
+        },
+        {
+          "syntax": "string (not detected as an absolute CSS color)",
+          "example": "label: 'Click me'",
+          "description": "Auto-detected from plain string"
+        }
+      ],
+      "usage": "Returns a string. Use explicit type: text to keep color-looking content as text."
+    },
+    "folder": {
+      "description": "Collapsible group for organizing controls",
+      "formats": [
+        {
+          "syntax": "{ nested: DialConfig }",
+          "example": "shadow: { offsetY: [8, 0, 24], blur: [16, 0, 48] }",
+          "description": "Nested object creates folder"
+        },
+        {
+          "syntax": "{ _collapsed: true, ...controls }",
+          "example": "shadow: { _collapsed: true, blur: [16, 0, 48, 1] }",
+          "description": "Start a folder collapsed. Use panel option defaultCollapsed for the entire panel."
+        }
+      ],
+      "usage": "Access nested values: params.shadow.blur. The _collapsed metadata is omitted at runtime."
+    },
+    "easing": {
+      "description": "Cubic Bezier editor with draggable handles, text coordinates, and keyboard editing",
+      "formats": [
+        {
+          "syntax": "{ type: 'easing', duration: number, ease: [number, number, number, number] }",
+          "example": "curve: { type: 'easing', duration: 0.3, ease: [0.25, 0.1, 0.25, 1] }",
+          "description": "Duration in seconds and cubic Bezier coordinates; supports switching to Time or Physics spring mode"
+        }
+      ],
+      "usage": "Returns TransitionConfig. Narrow on curve.type; convert easing to Motion's tween type at the rendering boundary."
+    },
+    "image": {
+      "description": "Image selection, upload, and drop control",
+      "formats": [
+        {
+          "syntax": "{ type: 'image', options?: (string | { value: string, label: string })[], default?: string }",
+          "example": "cover: { type: 'image', options: [{ value: '/cover.jpg', label: 'Cover' }] }",
+          "description": "Defaults to the first option unless a default URL is supplied"
+        },
+        {
+          "syntax": "{ type: 'image' }",
+          "example": "avatar: { type: 'image' }",
+          "description": "Upload-only control, initially empty"
+        }
+      ],
+      "usage": "Returns a URL or local data URL, or an empty string when cleared. Uploads up to 10 MB stay in the browser. Guard empty values before rendering with the project image component; persisted data URLs are subject to storage limits."
+    },
+    "pad": {
+      "description": "XY pad for editing a pair of related numbers",
+      "formats": [
+        {
+          "syntax": "{ type: 'pad' }",
+          "example": "position: { type: 'pad' }",
+          "description": "Each omitted axis defaults to [0, -1, 1, 0.01]"
+        },
+        {
+          "syntax": "{ type: 'pad', x?: [default, min, max, step?], y?: [default, min, max, step?], labels?: { x?: string, y?: string } }",
+          "example": "timing: { type: 'pad', x: [0.3, 0.1, 1, 0.01], y: [0.2, 0, 1, 0.01], labels: { x: 'Duration', y: 'Bounce' } }",
+          "description": "Explicit axes without a step use (max - min) / 200. Values clamp and snap. Labels do not rename returned keys."
+        }
+      ],
+      "usage": "Returns { x, y }. X increases rightward and Y upward; negate spatial Y for CSS/Motion screen coordinates if movement should follow the pad. Update the pair with setValue('position', { x, y }), not separate paths."
+    }
+  },
+  "smartDefaults": {
+    "blur": {"default": 0, "min": 0, "max": 100, "step": 1},
+    "opacity": {"default": 1, "min": 0, "max": 1, "step": 0.01},
+    "scale": {"default": 1, "min": 0.5, "max": 2, "step": 0.01},
+    "rotation": {"default": 0, "min": -180, "max": 180, "step": 1},
+    "rotate": {"default": 0, "min": -180, "max": 180, "step": 1},
+    "offsetX": {"default": 0, "min": -100, "max": 100, "step": 1},
+    "offsetY": {"default": 0, "min": -100, "max": 100, "step": 1},
+    "x": {"default": 0, "min": -100, "max": 100, "step": 1},
+    "y": {"default": 0, "min": -100, "max": 100, "step": 1},
+    "borderRadius": {"default": 0, "min": 0, "max": 50, "step": 1},
+    "shadowBlur": {"default": 16, "min": 0, "max": 48, "step": 1},
+    "shadowOffsetY": {"default": 8, "min": 0, "max": 24, "step": 1},
+    "shadowOpacity": {"default": 0.2, "min": 0, "max": 1, "step": 0.01},
+    "gap": {"default": 16, "min": 0, "max": 48, "step": 1},
+    "padding": {"default": 16, "min": 0, "max": 48, "step": 1},
+    "width": {"default": 200, "min": 50, "max": 500, "step": 1},
+    "height": {"default": 200, "min": 50, "max": 500, "step": 1},
+    "delay": {"default": 0, "min": 0, "max": 2, "step": 0.1},
+    "duration": {"default": 0.3, "min": 0, "max": 2, "step": 0.1},
+    "stagger": {"default": 0.1, "min": 0, "max": 0.5, "step": 0.01}
+  },
+  "typeDefinitions": {
+    "SpringConfig": "{ type: 'spring'; stiffness?: number; damping?: number; mass?: number; visualDuration?: number; bounce?: number }",
+    "ActionConfig": "{ type: 'action'; label?: string }",
+    "SelectConfig": "{ type: 'select'; options: (string | { value: string; label: string })[]; default?: string }",
+    "ColorConfig": "{ type: 'color'; default?: string }",
+    "TextConfig": "{ type: 'text'; default?: string; placeholder?: string }",
+    "DialValue": "number | boolean | string | SpringConfig | EasingConfig | ActionConfig | SelectConfig | ColorConfig | ImageConfig | TextConfig | DialPadConfig | DialPadValue",
+    "DialConfig": "{ [key: string]: DialValue | [number, number, number, number?] | DialConfig }",
+    "EasingConfig": "{ type: 'easing'; duration: number; ease: [number, number, number, number] }",
+    "TransitionConfig": "SpringConfig | EasingConfig",
+    "ImageOption": "string | { value: string; label: string }",
+    "ImageConfig": "{ type: 'image'; options?: ImageOption[]; default?: string }",
+    "DialPadAxis": "[number, number, number, number?]",
+    "DialPadValue": "{ x: number; y: number }",
+    "DialPadConfig": "{ type: 'pad'; x?: DialPadAxis; y?: DialPadAxis; labels?: { x?: string; y?: string } }",
+    "DialKitPersistOptions": "boolean | { key?: string; storage?: 'localStorage' | 'sessionStorage'; presets?: boolean }",
+    "ShortcutConfig": "{ key?: string; modifier?: 'alt' | 'shift' | 'meta'; mode?: 'fine' | 'normal' | 'coarse'; interaction?: 'scroll' | 'drag' | 'move' | 'scroll-only' }"
+  },
+  "commonPatterns": {
+    "fadeIn": {
+      "description": "Fade in animation controls",
+      "config": {
+        "opacity": [0, 0, 1],
+        "spring": {
+          "type": "spring",
+          "visualDuration": 0.4,
+          "bounce": 0
+        }
+      }
+    },
+    "scaleUp": {
+      "description": "Scale up animation controls",
+      "config": {
+        "scale": [0.9, 0.5, 1.5],
+        "spring": {
+          "type": "spring",
+          "visualDuration": 0.3,
+          "bounce": 0.2
+        }
+      }
+    },
+    "slideIn": {
+      "description": "Slide in animation controls",
+      "config": {
+        "offsetY": [20, -100, 100],
+        "opacity": [0, 0, 1],
+        "spring": {
+          "type": "spring",
+          "visualDuration": 0.4,
+          "bounce": 0.1
+        }
+      }
+    },
+    "cardShadow": {
+      "description": "Card shadow controls",
+      "config": {
+        "shadow": {
+          "offsetY": [8, 0, 24],
+          "blur": [16, 0, 48],
+          "opacity": [0.2, 0, 1]
+        }
+      }
+    },
+    "glassEffect": {
+      "description": "Glassmorphism effect controls",
+      "config": {
+        "blur": [16, 0, 48],
+        "opacity": [0.8, 0, 1],
+        "borderRadius": [16, 0, 50]
+      }
+    },
+    "hoverCard": {
+      "description": "Interactive hover card controls",
+      "config": {
+        "scale": [1, 0.95, 1.1],
+        "shadowBlur": [8, 0, 32],
+        "shadowOffsetY": [4, 0, 16],
+        "spring": {
+          "type": "spring",
+          "visualDuration": 0.2,
+          "bounce": 0.1
+        }
+      }
+    },
+    "spatialPad": {
+      "description": "Position pair with CSS/Motion Y negated at the binding",
+      "config": {
+        "position": {
+          "type": "pad",
+          "x": [0, -100, 100, 1],
+          "y": [0, -100, 100, 1]
+        }
+      }
+    },
+    "easingPreview": {
+      "description": "An easing curve with a position target; convert easing to Motion tween when binding",
+      "config": {
+        "offsetX": [0, -100, 100, 1],
+        "curve": {
+          "type": "easing",
+          "duration": 0.3,
+          "ease": [0.25, 0.1, 0.25, 1]
+        }
+      }
+    },
+    "contentPreview": {
+      "description": "Editable text, wide-gamut color, and a local image choice",
+      "config": {
+        "title": "Hello",
+        "accent": "oklch(0.7 0.2 145 / 0.8)",
+        "cover": {
+          "type": "image",
+          "options": ["/cover.jpg"]
+        }
+      }
+    }
+  }
+}

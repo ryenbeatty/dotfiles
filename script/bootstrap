@@ -112,30 +112,36 @@ install_dotfiles () {
 }
 install_config_files () {
   info 'installing .config dotfiles'
-  
-  # Create .config directory if it doesn't exist
+
   if [ ! -d "$HOME/.config" ]
   then
     mkdir -p "$HOME/.config"
     success "created $HOME/.config"
   fi
-  
-  # Check if config directory exists in dotfiles
+
   if [ -d "$DOTFILES_ROOT/config" ]
   then
     local overwrite_all=false backup_all=false skip_all=false
-    
-    # Iterate through directories in config/
+
     for src in "$DOTFILES_ROOT/config/"*/
     do
-      # Remove trailing slash and get directory name
       src=${src%/}
-      [ -e "$src" ] || continue  # Skip if no directories found
-      
+      [ -e "$src" ] || continue
+
       local config_name=$(basename "$src")
       local dst="$HOME/.config/$config_name"
-      
-      link_file "$src" "$dst"
+
+      # Link individual .symlink files to their proper names inside ~/.config
+      if find "$src" -maxdepth 1 -name '*.symlink' | grep -q '.'; then
+        mkdir -p "$dst"
+        for file_src in "$src"/*.symlink; do
+          [ -e "$file_src" ] || continue
+          local file_dst="$dst/$(basename "${file_src%.*}")"
+          link_file "$file_src" "$file_dst"
+        done
+      else
+        link_file "$src" "$dst"
+      fi
     done
   else
     info 'no config directory found, skipping'
@@ -144,6 +150,17 @@ install_config_files () {
 setup_gitconfig
 install_dotfiles
 install_config_files
+install_skills () {
+  info 'installing skills symlink'
+  mkdir -p "$HOME/.agents"
+  link_file "$DOTFILES_ROOT/skills" "$HOME/.agents/skills"
+  # The skills installer ($HOME/.agents/.skill-lock.json) tracks provenance for
+  # everything under skills/. Keep the versioned copy in sync so a fresh machine
+  # knows where each skill came from.
+  link_file "$DOTFILES_ROOT/skills/.skill-lock.json" "$HOME/.agents/.skill-lock.json"
+  success 'skills symlink installed'
+}
+install_skills
 # If we're on a Mac, let's install and setup homebrew.
 if [ "$(uname -s)" == "Darwin" ]
 then

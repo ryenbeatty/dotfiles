@@ -1,2 +1,6 @@
 git/gitconfig.local.symlink
 node_modules
+.DS_Store
+
+# pi agent scratch output
+.pi/quiet-tools/
