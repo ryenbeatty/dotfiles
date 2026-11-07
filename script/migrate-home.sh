@@ -160,10 +160,15 @@ if [[ -d $HOME/.conda ]]; then
   fi
 fi
 
-# managers themselves, and the two Homebrew pythons nothing was using
-run brew uninstall pyenv pyenv-virtualenv
-run brew uninstall python@3.12 python@3.15
+# pyenv-virtualenv was never a keg -- it lived in ~/.pyenv/plugins and went with
+# ~/.pyenv above, so uninstalling it here only errors.
+run brew uninstall pyenv
 run brew uninstall --cask miniconda
+
+# Homebrew's python@3.12 / python@3.15 are deliberately KEPT: brew reports them as
+# dependencies of youtube-dl and yt-dlp, so removing them would break those. They
+# are also irrelevant now -- config/uv/uv.toml sets python-preference = "managed",
+# so uv never falls back to them.
 
 # uv itself: switch from the standalone installer to the formula. Its receipt
 # blocks config/uv being a symlink into the repo, and its ~/.local/bin/uv would
