@@ -1,14 +1,21 @@
+# Merged from the two configs that used to fight over this file:
+#   ~/.alacritty.toml (what actually loaded) and this repo's copy.
+# Edit here only -- bootstrap links it to ~/.config/alacritty/alacritty.toml.
+import = [
+  "~/.config/alacritty/themes/gruvbox.toml"
+]
+
 [env]
-TERM = 'xterm-256color'
+TERM = "xterm-256color"
 
 [window]
-option_as_alt = 'Both'
+option_as_alt = "Both"
 padding.x = 10
 padding.y = 10
-decorations = 'Buttonless' 
+decorations = "Buttonless"
 opacity = 0.8
 blur = true
 
 [font]
-normal.family = 'BlexMono Nerd Font'
-size = 16
+normal = { family = "GeistMono Nerd Font", style = "Regular" }
+size = 14
