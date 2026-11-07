@@ -104,6 +104,22 @@ if [[ -f $HOME/.local/scripts/tmux-git-sessionizer ]]; then
   run rmdir "$HOME/.local/scripts"   # only succeeds if now empty
 fi
 
+hr "old neovim plugin state (the retired NvChad stack)"
+# config/nvim is now a hand-rolled lazy.nvim setup. These directories belong to
+# the previous NvChad install (NvChad + base46/ui/cmps) and to plugins that were
+# removed from the spec. Nothing in the new config references them.
+NVIM_DATA="$HOME/.local/share/nvim"
+if [[ -d $NVIM_DATA ]]; then
+  for d in NvChad base46 ui volt menu minty nvim-cmp cmp_luasnip cmp-buffer \
+           cmp-nvim-lsp cmp-nvim-lua cmp-path null-ls.nvim prettier.nvim \
+           vim-be-good mini.main.cloning; do
+    [[ -e $NVIM_DATA/lazy/$d ]] || continue
+    run trash "$NVIM_DATA/lazy/$d"
+  done
+  # generated highlight cache from NvChad's base46
+  [[ -d $NVIM_DATA/base46 ]] && run trash "$NVIM_DATA/base46"
+fi
+
 hr "~/.codex (101MB, codex is not installed)"
 if [[ -d $HOME/.codex ]] && ! command -v codex >/dev/null 2>&1; then
   run du -sh "$HOME/.codex"
