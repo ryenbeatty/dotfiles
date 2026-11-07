@@ -162,8 +162,17 @@ fi
 
 # pyenv-virtualenv was never a keg -- it lived in ~/.pyenv/plugins and went with
 # ~/.pyenv above, so uninstalling it here only errors.
-run brew uninstall pyenv
-run brew uninstall --cask miniconda
+brew_has_formula () { brew list --formula "$1" >/dev/null 2>&1; }
+brew_has_cask () { brew list --cask "$1" >/dev/null 2>&1; }
+
+# Guarded: the script is re-runnable, and a second pass would otherwise print
+# "Error: No such keg" / "Cask is not installed" for things already removed.
+if brew_has_formula pyenv; then
+  run brew uninstall pyenv
+fi
+if brew_has_cask miniconda; then
+  run brew uninstall --cask miniconda
+fi
 
 # Homebrew's python@3.12 / python@3.15 are deliberately KEPT: brew reports them as
 # dependencies of youtube-dl and yt-dlp, so removing them would break those. They
@@ -183,7 +192,9 @@ fi
 # uv hygiene: stale 3.11 alias, and the 4.4G cache (prune is conservative --
 # `uv cache clean` reclaims all of it)
 if command -v uv >/dev/null 2>&1; then
-  run uv python uninstall 3.11
+  if uv python list 2>/dev/null | grep -q 'cpython-3\.11-macos'; then
+    run uv python uninstall 3.11
+  fi
   run uv cache prune
 fi
 
@@ -203,9 +214,12 @@ if command -v npm >/dev/null 2>&1; then
   run sh -c "npm ls -g --depth=0 > '$BK/npm-globals.txt' 2>&1 || true"
 fi
 
-# bun is installed twice. Bun's own installer owns ~/.bun and the global CLIs in
-# ~/.bun/bin, so drop the Homebrew formula and let bun/path.zsh be the only one.
-[[ -d /opt/homebrew/Cellar/bun ]] && run brew uninstall bun
+# bun used to be installed twice. Bun's own installer owns ~/.bun and the global
+# CLIs in ~/.bun/bin (qmd), so the Homebrew formula is the redundant runtime --
+# bun/path.zsh makes ~/.bun/bin the only bun on PATH.
+if brew_has_formula bun; then
+  run brew uninstall bun
+fi
 
 # ----------------------------------------------------------------- 5. skills
 hr "skill harness links"
