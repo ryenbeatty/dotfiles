@@ -33,7 +33,10 @@ brew update
 
 # Install essential packages
 echo "Installing essential packages..."
+# Python is uv's job (python/install.sh): no pyenv, and no python@X formulae,
+# so `python3` cannot end up ambiguous between a shim, a cask and a formula.
 brew install --quiet \
+  uv \
   fzf \
   ripgrep \
   git \

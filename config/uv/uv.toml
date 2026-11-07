@@ -1,0 +1,7 @@
+# uv global config, linked to ~/.config/uv/uv.toml by script/bootstrap.
+#
+# "managed" means uv only ever uses interpreters it installed itself
+# (~/.local/share/uv/python); it will never fall back to a Homebrew or
+# leftover pyenv python. That is what makes the old pyenv setup unnecessary.
+python-preference = "managed"
+python-downloads = "automatic"

@@ -1,0 +1,4 @@
+# Python interpreters provisioned with `uv python install` (python/install.sh).
+# One per line. Add a line and re-run ./python/install.sh to get another.
+# 3.13 matches ~/Code/kato/ops/tiptap/.python-version.
+3.13

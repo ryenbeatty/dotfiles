@@ -1,0 +1,7 @@
+# Command line tools installed with `uv tool install` (python/install.sh).
+# One per line; blank lines and # comments are ignored.
+# These are the tools and entry points that used to live in the pyenv global.
+docling
+rapid-mlx
+ruff
+huggingface-hub[cli]

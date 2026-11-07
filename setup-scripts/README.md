@@ -1,5 +1,12 @@
 # Setup Scripts
 
+> **Superseded.** These are dated snapshots of a one-off laptop setup and are
+> kept for reference only. The live path is `script/bootstrap` (symlinks),
+> `bin/dot` → `script/install` (runs every topic's `install.sh`), and
+> `script/migrate-home.sh` for one-time machine convergence. In particular the
+> Python sections here install pyenv + `pip install uv` into it; that pattern
+> was retired in favour of uv alone (`python/install.sh`, `config/uv/uv.toml`).
+
 This directory contains automated setup scripts for different development environments and time periods.
 
 ## 📁 Directory Structure
