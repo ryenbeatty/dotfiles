@@ -187,7 +187,26 @@ if command -v uv >/dev/null 2>&1; then
   run uv cache prune
 fi
 
-# ----------------------------------------------------------------- 4. skills
+# ----------------------------------------------------------------- 4. node
+hr "node: fnm + corepack"
+# fnm takes over version switching (node/install.sh). Two leftovers to tidy:
+# a mixed .nvmrc spelling, and the record of what is welded to the Homebrew node.
+if [[ -f $HOME/Code/ReactTube/.nvmrc ]] && grep -qx 'v24' "$HOME/Code/ReactTube/.nvmrc" 2>/dev/null; then
+  run cp "$HOME/Code/ReactTube/.nvmrc" "$BK/ReactTube.nvmrc.bak"
+  run sh -c "printf '24\n' > '$HOME/Code/ReactTube/.nvmrc'"
+fi
+
+# Global npm packages live inside the Homebrew node install, so record them
+# before anything touches it (they need reinstalling under fnm's versions).
+if command -v npm >/dev/null 2>&1; then
+  run sh -c "npm ls -g --depth=0 > '$BK/npm-globals.txt' 2>&1 || true"
+fi
+
+# bun is installed twice. Bun's own installer owns ~/.bun and the global CLIs in
+# ~/.bun/bin, so drop the Homebrew formula and let bun/path.zsh be the only one.
+[[ -d /opt/homebrew/Cellar/bun ]] && run brew uninstall bun
+
+# ----------------------------------------------------------------- 5. skills
 hr "skill harness links"
 # One tree (~/.dotfiles/skills, symlinked as ~/.agents/skills) for every
 # harness; these three were real copies, so they could drift.
