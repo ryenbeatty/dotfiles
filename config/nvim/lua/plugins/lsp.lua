@@ -23,11 +23,16 @@ return {
     event = { "BufReadPre", "BufNewFile" },
     -- One list for everything mason should provide, servers included, so a
     -- single `:MasonToolsInstallSync` (nvim/install.sh) provisions the lot.
+    -- Names are mason *package* names, which differ from lspconfig's server
+    -- names: html/css/json come from html-lsp / css-lsp / json-lsp (there is no
+    -- `vscode-langservers-extracted` package in the current registry).
     opts = {
       ensure_installed = {
         "lua-language-server",
         "typescript-language-server",
-        "vscode-langservers-extracted",
+        "html-lsp",
+        "css-lsp",
+        "json-lsp",
         "yaml-language-server",
         "eslint-lsp",
         "stylua",
