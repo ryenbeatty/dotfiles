@@ -20,18 +20,14 @@ yabai -m config mouse_action2 resize
 
 
 # when window is dropped in center of another window, swap them (on edges it will split it)
-yabai -m mouse_drop_action swap
+yabai -m config mouse_drop_action swap
 yabai -m rule --add app="^System Settings$" manage=off
 yabai -m rule --add app="^Calculator$" manage=off
 yabai -m rule --add app="^Raycast$" manage=off
+yabai -m rule --add app="^KeePass XC$" manage=off
 yabai -m rule --add app="^ProtonVPN$" manage=off
 yabai -m rule --add app="^Karabiner-Elements$" manage=off
-yabai -m rule --add app="^KeePassXC$" manage=off
-yabai -m rule --add app="^CleanshotX$" manage=off
 yabai -m rule --add app="^Todoist$" manage=off
 yabai -m rule --add app="^Cold Turkey Blocker$" manage=off
-
-yabai -m rule --add app="^VLC$" border=off
-yabai -m rule --add app="^Claude$" border=off
-yabai -m rule --add app="^Beat$" border=off
-yabai -m rule --add app="^CleanshotX$" border=off
+yabai -m rule --add app="^Loom$" manage=off
+yabai -m rule --add label="Screen Studio" app="^Screen Studio$" manage=off
