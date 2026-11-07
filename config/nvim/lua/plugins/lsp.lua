@@ -5,7 +5,7 @@ local servers = { "lua_ls", "ts_ls", "html", "cssls", "jsonls", "yamlls", "eslin
 return {
   {
     "williamboman/mason.nvim",
-    cmd = "Mason",
+    cmd = { "Mason", "MasonInstall", "MasonUninstall", "MasonUpdate", "MasonLog" },
     build = ":MasonUpdate",
     opts = {},
   },
@@ -14,14 +14,28 @@ return {
     "williamboman/mason-lspconfig.nvim",
     dependencies = { "williamboman/mason.nvim", "neovim/nvim-lspconfig" },
     event = { "BufReadPre", "BufNewFile" },
-    opts = { ensure_installed = servers, automatic_installation = true },
+    opts = { ensure_installed = servers },
   },
 
   {
     "WhoIsSethDaniel/mason-tool-installer.nvim",
     dependencies = { "williamboman/mason.nvim" },
     event = { "BufReadPre", "BufNewFile" },
-    opts = { ensure_installed = { "stylua", "prettier", "eslint_d" }, run_on_start = true },
+    -- One list for everything mason should provide, servers included, so a
+    -- single `:MasonToolsInstallSync` (nvim/install.sh) provisions the lot.
+    opts = {
+      ensure_installed = {
+        "lua-language-server",
+        "typescript-language-server",
+        "vscode-langservers-extracted",
+        "yaml-language-server",
+        "eslint-lsp",
+        "stylua",
+        "prettier",
+        "eslint_d",
+      },
+      run_on_start = true,
+    },
   },
 
   { "j-hui/fidget.nvim", event = "LspAttach", opts = {} },
