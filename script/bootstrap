@@ -128,20 +128,11 @@ install_config_files () {
       src=${src%/}
       [ -e "$src" ] || continue
 
+      # Each topic directory is symlinked whole, e.g.
+      #   config/alacritty -> ~/.config/alacritty
+      # so files added inside it are picked up without touching bootstrap.
       local config_name=$(basename "$src")
-      local dst="$HOME/.config/$config_name"
-
-      # Link individual .symlink files to their proper names inside ~/.config
-      if find "$src" -maxdepth 1 -name '*.symlink' | grep -q '.'; then
-        mkdir -p "$dst"
-        for file_src in "$src"/*.symlink; do
-          [ -e "$file_src" ] || continue
-          local file_dst="$dst/$(basename "${file_src%.*}")"
-          link_file "$file_src" "$file_dst"
-        done
-      else
-        link_file "$src" "$dst"
-      fi
+      link_file "$src" "$HOME/.config/$config_name"
     done
   else
     info 'no config directory found, skipping'
