@@ -96,7 +96,9 @@ if [[ -d $HOME/.oh-my-zsh ]]; then
 fi
 
 hr "~/.local/scripts/tmux-git-sessionizer"
-# Byte-identical to ~/.dotfiles/bin/tmux-sessionizer, which is already on PATH.
+# Byte-identical to ~/.dotfiles/bin/tmux-sessionizer. bin/ is on PATH and also
+# exposes the old name (bin/tmux-git-sessionizer -> tmux-sessionizer), so
+# removing this copy loses nothing.
 if [[ -f $HOME/.local/scripts/tmux-git-sessionizer ]]; then
   run trash "$HOME/.local/scripts/tmux-git-sessionizer"
   run rmdir "$HOME/.local/scripts"   # only succeeds if now empty
