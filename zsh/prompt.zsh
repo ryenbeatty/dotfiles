@@ -34,5 +34,7 @@ directory_name() {
   print -r -- "%B%F{cyan}%1/%\/%f%b"
 }
 
-PROMPT=$'\n$(directory_name) $(git_dirty)$(need_push)\n%F{8}❯%f '
+# The prompt character is the literal glyph at the end of PROMPT (currently a
+# lambda); %F{8} paints it bright black and %f resets.
+PROMPT=$'\n$(directory_name) $(git_dirty)$(need_push)\n%F{8}λ%f '
 RPROMPT=''
