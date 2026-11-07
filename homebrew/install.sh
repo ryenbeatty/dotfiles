@@ -56,10 +56,14 @@ brew install --quiet koekeishiya/formulae/skhd
 echo "Installing GUI applications..."
 brew install --cask --quiet \
   alacritty \
-  visual-studio-code
+  visual-studio-code \
+  cleanshot \
+  superwhisper \
+  shifty \
+  protonvpn
 
 # Install fonts
 echo "Installing fonts..."
-brew install --cask --quiet font-blex-mono-nerd-font
+brew install --cask --quiet font-blex-mono-nerd-font font-geist-mono-nerd-font
 
 echo "Homebrew installation complete!"
