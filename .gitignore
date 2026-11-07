@@ -4,3 +4,6 @@ node_modules
 
 # pi agent scratch output
 .pi/quiet-tools/
+
+# local repo snapshots (see script/migrate-home.sh)
+.backup/
