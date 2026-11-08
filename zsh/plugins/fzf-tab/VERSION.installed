@@ -1,0 +1,13 @@
+Vendored from https://github.com/Aloxaf/fzf-tab (branch master tarball).
+HEAD at install time: 24105b15714bfec37989ed5c5b6e60f572253019
+Latest tag at install time: v1.3.0 (d7e0234614dbe5369fdd760907d12c0e05a4dccc)
+
+Installed 2025-11-08 by clobbering the tarball contents into this directory --
+there is no .git here, so `lib/-ftb-version` reports "unknown". To update:
+
+  cd ~/.dotfiles/zsh/plugins
+  curl -sSL https://codeload.github.com/Aloxaf/fzf-tab/tar.gz/refs/heads/master \
+    | tar xz -C fzf-tab --strip-components=1
+
+(The brew formula `fzf-tab` installs to $HOMEBREW_PREFIX/share/fzf-tab instead;
+zshrc.symlink only sources that path if it exists, so vendoring here wins.)

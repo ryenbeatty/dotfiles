@@ -18,13 +18,18 @@ zstyle ':completion:*' completer _expand _complete _approximate
 zstyle ':completion:*' max-errors 2 numeric
 
 # --- the menu ---------------------------------------------------------------
-# TAB twice opens an arrow-key menu instead of just re-listing.
-zstyle ':completion:*' menu select
-zstyle ':completion:*' select-prompt '%SScrolling active: current selection at %p%s'
+# No `menu`/`select`/`select-prompt` here any more. The completion menu is now
+# fzf-tab (zsh/plugins/fzf-tab, sourced from zshrc.symlink): it replaces zsh's
+# arrow-key menu with an fzf picker, so those styles only described a UI that
+# never appears. fzf-tab forces `list-grouped false` itself and renders group
+# headers from the `descriptions` format below.
 
 # --- annotated, grouped, coloured listings ----------------------------------
 zstyle ':completion:*' group-name ''
-zstyle ':completion:*:descriptions' format '%F{yellow}-- %d --%f'
+# Plain text on purpose: fzf-tab ignores escape sequences in this format and
+# uses it as its group header. The colours were for zsh's own menu, which is
+# gone now.
+zstyle ':completion:*:descriptions' format '[%d]'
 zstyle ':completion:*:messages'     format '%F{purple}-- %d --%f'
 zstyle ':completion:*:warnings'     format '%F{red}-- no matches for: %d --%f'
 zstyle ':completion:*:corrections'  format '%F{green}-- %d (errors: %e) --%f'
@@ -40,10 +45,18 @@ fi
 zstyle ':completion:*:*:kill:*:processes' list-colors '=(#b) #([0-9]#)*=0=01;31'
 
 # --- paths ------------------------------------------------------------------
-zstyle ':completion:*' special-dirs true    # complete . and .. as directories
+# `..` as a candidate is one of the ways a completion list ends up offering a
+# directory you are not in. The parent is one `cd -` away; it does not need to be
+# TAB-completed.
+zstyle ':completion:*' special-dirs false
 zstyle ':completion:*' squeeze-slashes true # `cd foo//bar` -> `cd foo/bar`
-# don't offer PATH executables / named dirs when completing after cd
-zstyle ':completion:*:cd:*' tag-order local-directories directory-stack path-directories
+# tag-order *restricts* completion to the tags listed. The old value named
+# path-directories (i.e. cdpath) and directory-stack, which kept both in play --
+# the comment above it claimed the opposite. A lone `-` value means "only the
+# tags named, never fall back to the unlisted ones", so `cd <TAB>` can now only
+# offer directories inside $PWD. (`directory-stack` is dead weight in practice:
+# `_cd` only asks for it when the word starts with a `-`/`+`.)
+zstyle ':completion:*:cd:*' tag-order local-directories directory-stack -
 
 # --- cache & freshness ------------------------------------------------------
 # cache expensive completions (dpkg/apt style listings, git refs, ...)
@@ -78,3 +91,14 @@ zstyle ':completion:*' insert-tab pending
 if [[ -o zle ]]; then
   bindkey '^[[Z' reverse-menu-complete
 fi
+
+# ============================================================================
+# fzf-tab
+# ============================================================================
+# Inert unless zsh/plugins/fzf-tab is present (see the source in zshrc.symlink).
+#
+# fzf-tab does not read FZF_DEFAULT_OPTS (some flags break it), and this repo
+# sets FZF_DEFAULT_COMMAND only, so the picker stays default-clean.
+zstyle ':fzf-tab:*' fzf-flags --height=60% --bind=tab:accept
+# Show what is inside the directory you are about to cd into.
+zstyle ':fzf-tab:complete:cd:*' fzf-preview 'command ls -1 $realpath'

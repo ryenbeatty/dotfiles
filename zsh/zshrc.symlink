@@ -91,16 +91,23 @@ if [[ -t 0 ]] && command -v fzf >/dev/null 2>&1; then
   fi
 fi
 
-# zsh-autosuggestions: grey inline completion from history.
-# zsh-syntax-highlighting: must be sourced after every other zle setup, i.e.
-# after the bindkey calls above, or its highlighters get clobbered.
-# Both are vendored in this repo and installed by script/bootstrap. They used to
-# be cloned into ~/.oh-my-zsh/custom, but oh-my-zsh itself is not used here
-# (ZSH points at ~/.dotfiles), so nothing was loading them.
+# Plugin order is load-bearing:
+#   1. fzf-tab -- replaces the completion *menu* with an fzf picker. It copies the
+#      widget it wraps (grabbing `-> fzf-completion`, which `fzf --zsh` above just
+#      bound to ^I, as its fallback), so it has to be sourced after `fzf --zsh`
+#      and after compinit, but before anything else touches zle.
+#   2. zsh-syntax-highlighting -- sourced last; its highlighters get clobbered by
+#      any later zle setup, and fzf-tab's comment explicitly expects to run
+#      before it.
+# zsh-autosuggestions was removed deliberately: its grey text came from the
+# shared *global* history, so it offered paths from directories you were not in,
+# and the TAB widget that used to live below accepted that text before real
+# completion ever ran. fzf-tab filters compsys candidates, which are always
+# scoped to the command and the current directory.
 _zsh_plugins="$ZSH/zsh/plugins"
 if [[ -t 0 ]]; then
-  if [[ -f $_zsh_plugins/zsh-autosuggestions/zsh-autosuggestions.zsh ]]; then
-    source $_zsh_plugins/zsh-autosuggestions/zsh-autosuggestions.zsh
+  if [[ -f $_zsh_plugins/fzf-tab/fzf-tab.plugin.zsh ]]; then
+    source $_zsh_plugins/fzf-tab/fzf-tab.plugin.zsh
   fi
   if [[ -f $_zsh_plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh ]]; then
     source $_zsh_plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
@@ -108,30 +115,12 @@ if [[ -t 0 ]]; then
 fi
 unset _zsh_plugins
 
-# --- TAB: take the grey inline suggestion, else complete ---------------------
-# zsh-autosuggestions accepts its history suggestion on → (forward-char) and
-# End. TAB is the completion key, so this widget picks: take the suggestion
-# when one is showing, complete when there isn't one.
-#
-# It has to be defined here, not in completion.zsh. `fzf --zsh` above binds ^I
-# to fzf-completion, so an earlier bindkey would be replaced (and fzf's `**`
-# trigger unreachable from TAB); autosuggestions also rebinds every widget it
-# doesn't ignore as a "modify" widget, which blanks POSTDISPLAY before calling
-# it -- a widget defined after the plugin, or named with a leading underscore
-# as this one is, is left alone. → keeps working; TAB is the addition.
-if [[ -t 0 ]]; then
-  _accept-suggestion-or-complete() {
-    if [[ -n $POSTDISPLAY && -n ${widgets[autosuggest-accept]} ]]; then
-      zle autosuggest-accept
-    elif [[ -n ${functions[fzf-completion]} ]]; then
-      zle fzf-completion      # keeps fzf's `**` fuzzy completion on TAB
-    else
-      zle expand-or-complete
-    fi
-  }
-  zle -N _accept-suggestion-or-complete
-  bindkey '^I' _accept-suggestion-or-complete
-fi
+# --- TAB ---------------------------------------------------------------------
+# fzf-tab binds ^I itself (emacs and viins keymaps) when it is sourced above, so
+# there is no widget to define here any more. TAB is now: fzf picker over the
+# real candidates, falling back to fzf's `**` fuzzy path completion. Accepting a
+# history suggestion on TAB disappeared with zsh-autosuggestions; → and End keep
+# their stock line-editor meaning.
 
 #determines search program for fzf
 if type ag &> /dev/null; then
@@ -179,3 +168,6 @@ if command -v wt >/dev/null 2>&1; then eval "$(command wt config shell init zsh)
 
 # PATH entries live in system/_path.zsh, tool env vars in system/env.zsh,
 # private keys in ~/.localrc, and aliases in zsh/aliases.zsh.
+
+# bun completions
+[ -s "/Users/ryenbeatty/.bun/_bun" ] && source "/Users/ryenbeatty/.bun/_bun"

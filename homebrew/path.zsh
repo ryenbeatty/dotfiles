@@ -10,3 +10,13 @@ if [[ -d $HOMEBREW_PREFIX/share/zsh/site-functions ]]; then
   typeset -U fpath
   fpath=($HOMEBREW_PREFIX/share/zsh/site-functions $fpath)
 fi
+
+# zsh-completions: several thousand extra _-definitions for CLIs that ship none
+# of their own (docker, kubectl, helm, gh, ...). Not vendored -- it is ~4k files.
+# `brew install zsh-completions` drops it at the path below; until that happens,
+# or on a machine without it, this block is a no-op. Must precede compinit, which
+# zshrc.symlink runs after all path.zsh files, so the ordering is already right.
+if [[ -d $HOMEBREW_PREFIX/share/zsh-completions ]]; then
+  typeset -U fpath
+  fpath=($HOMEBREW_PREFIX/share/zsh-completions $fpath)
+fi
