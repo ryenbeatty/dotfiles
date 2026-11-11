@@ -1,75 +1,66 @@
 #!/usr/bin/env bash
 #
-# Install Homebrew and essential packages
+# Install Homebrew, then everything listed in the repo's Brewfile.
+#
+# The package list lives in ../Brewfile (one declarative file, no loops over
+# bash arrays); this script only has to bootstrap brew itself, because
+# `brew bundle` needs a working brew to do anything.
 
 set -euo pipefail
 
-# Check if we're on macOS
+TOPIC_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+BREWFILE="$(cd "$TOPIC_DIR/.." && pwd)/Brewfile"
+
+if [[ ! -f $BREWFILE ]]; then
+  echo "Brewfile not found at $BREWFILE" >&2
+  exit 1
+fi
+
+# ------------------------------------------------------------- 1. macOS
 if [[ "$(uname -s)" != "Darwin" ]]; then
   echo "Homebrew installation is only supported on macOS"
   exit 0
 fi
 
-# Install Homebrew if it doesn't exist
+# ------------------------------------------------------------- 2. brew
 if ! command -v brew >/dev/null 2>&1; then
-  echo "Installing Homebrew..."
+  echo "› installing Homebrew"
   /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 
-  # Add Homebrew to PATH for the rest of the script
-  if [[ -f "/opt/homebrew/bin/brew" ]]; then
-    # Apple Silicon Mac
+  # Make brew usable for the rest of this script (the shellenv lines only land
+  # in ~/.zprofile, which does not affect a running non-login shell).
+  if [[ -x /opt/homebrew/bin/brew ]]; then
     eval "$(/opt/homebrew/bin/brew shellenv)"
-  elif [[ -f "/usr/local/bin/brew" ]]; then
-    # Intel Mac
+  elif [[ -x /usr/local/bin/brew ]]; then
     eval "$(/usr/local/bin/brew shellenv)"
   fi
 else
-  echo "Homebrew is already installed"
+  echo "› Homebrew already installed ($(command -v brew))"
 fi
 
-# Update Homebrew
-echo "Updating Homebrew..."
-brew update
+# ------------------------------------------------------------- 3. packages
+# `install` is idempotent: it skips what is already present, so this is safe to
+# re-run from `dot` on any machine. Services are not started here -- yabai and
+# skhd are `brew services` decisions, not install decisions.
+echo "› brew bundle --file=$BREWFILE"
+brew bundle install --file="$BREWFILE"
 
-# Install essential packages
-echo "Installing essential packages..."
-# Python is uv's job (python/install.sh): no pyenv, and no python@X formulae,
-# so `python3` cannot end up ambiguous between a shim, a cask and a formula.
-# Node versions are mise's job (node/install.sh, config/mise/config.toml),
-# not Homebrew's `node` -- though `node` stays installed because neonctl and
-# prettierd depend on it.
-brew install --quiet \
-  uv \
-  fzf \
-  ripgrep \
-  git \
-  nvim \
-  tmux \
-  tree \
-  wget \
-  curl \
-  jq \
-  gh \
-  grc \
-  coreutils
+# ------------------------------------------------- 4. compinit hygiene
+# compinit aborts (and, interactively, asks "Ignore insecure directories and
+# continue [y] or abort compinit [n]?") if any directory on $fpath is writable
+# by group or others. Homebrew's share/ directory is the usual offender -- some
+# formulae/installs leave it drwxrwxr-x, and homebrew/path.zsh puts
+# share/zsh/site-functions on $fpath.
+#
+# Only the parents of $fpath get touched here, never the formula trees
+# themselves, and `chmod go-w` is a no-op when the mode is already correct.
+BREW_PREFIX=$(brew --prefix)
+for dir in "$BREW_PREFIX/share" "$BREW_PREFIX/share/zsh" "$BREW_PREFIX/share/zsh/site-functions"; do
+  [[ -d $dir ]] || continue
+  if [[ -n $(find "$dir" -maxdepth 0 -perm -0020 -o -maxdepth 0 -perm -0002 2>/dev/null) ]]; then
+    echo "› tightening $dir (compinit insecure-directory check)"
+    chmod go-w "$dir" || echo "  could not chmod $dir -- fix by hand" >&2
+  fi
+done
 
-# Install window management tools from koekeishiya tap
-echo "Installing window management tools..."
-brew install --quiet koekeishiya/formulae/yabai
-brew install --quiet koekeishiya/formulae/skhd
-
-# Install GUI applications
-echo "Installing GUI applications..."
-brew install --cask --quiet \
-  alacritty \
-  visual-studio-code \
-  cleanshot \
-  superwhisper \
-  shifty \
-  protonvpn
-
-# Install fonts
-echo "Installing fonts..."
-brew install --cask --quiet font-blex-mono-nerd-font font-geist-mono-nerd-font
-
-echo "Homebrew installation complete!"
+echo "› Homebrew + Brewfile up to date"
