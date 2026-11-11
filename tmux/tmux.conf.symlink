@@ -1,36 +1,32 @@
-# List of plugins
+# tmux.conf -- linked to ~/.tmux.conf by script/bootstrap.
+
+# --- plugins (tpm) -----------------------------------------------------------
 set -g @plugin 'tmux-plugins/tpm'
 set -g @plugin 'tmux-plugins/tmux-sensible'
 set -g @plugin 'tmux-plugins/tmux-resurrect'
 set -g @plugin 'tmux-plugins/tmux-continuum'
 set -g @plugin 'christoomey/vim-tmux-navigator'
 set -g @plugin 'egel/tmux-gruvbox'
-# set desired theme options...
-set -g @tmux-gruvbox 'dark' # or 'dark256', 'light',
+set -g @tmux-gruvbox 'dark' # or 'dark256', 'light'
 
-# Initialize TMUX plugin manager (keep this line at the very bottom of tmux.conf)
+# Initialise tpm -- must stay the last line of this file.
 run '~/.tmux/plugins/tpm/tpm'
 
-# Set 256 colors
+# --- terminal ----------------------------------------------------------------
+# tmux-256color carries the full 256-colour set; the old
+# `terminal-overrides ",xterm*:Tc"` line is no longer needed now that every
+# terminal in use advertises truecolor itself (tmux >= 3.2 reads it directly).
 set -s default-terminal 'tmux-256color'
-set-option -sa terminal-overrides ",xterm*Tc"
 
-# Extended keys so pi can distinguish Shift/Ctrl/Alt+Enter from plain Enter
+# Extended keys so pi (and vim) can tell Shift/Ctrl/Alt+Enter from plain Enter.
 set -g extended-keys on
 set -g extended-keys-format csi-u
 
-# Set prefix
-# unbind C-b
-# set -g prefix C-Space
-# bind C-Space send-prefix
-
-# Shift
+# --- keys --------------------------------------------------------------------
+# prefix is the stock C-b; no rebinding, so no commented-out block either.
 bind -n M-H previous-window
 bind -n M-L next-window
-
-# sessionizer
 bind-key -r C-f run-shell "tmux neww tmux-sessionizer"
 
-# vi mode
+# vi keys in copy mode
 setw -g mode-keys vi
-
