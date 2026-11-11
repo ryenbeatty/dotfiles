@@ -11,7 +11,26 @@
       "telemetry.astro.build",
       "ws.audioscrobbler.com",
       "example.com",
-      "api.weatherapi.com"
+      "api.weatherapi.com",
+      "api.parallel.ai",
+      "skills.parallel.ai",
+      "colorarchive.org",
+      "everyhexcode.com",
+      "images.unsplash.com",
+      "commons.wikimedia.org",
+      "upload.wikimedia.org",
+      "docs.x.com",
+      "docs.joinmastodon.org",
+      "archive.org",
+      "web.archive.org",
+      "nextjs.org",
+      "blog.joinmastodon.org",
+      "raw.githubusercontent.com",
+      "ryenbeatty.info",
+      "api.allorigins.win",
+      "www.ryenbeatty.info",
+      "cloud.umami.is",
+      "gateway.umami.is"
     ]
   }
 }
