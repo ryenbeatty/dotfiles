@@ -1,17 +1,25 @@
+# Global gitignore -- linked to ~/.gitignore by script/bootstrap, and pointed at
+# from core.excludesFile in git/gitconfig.symlink.
+#
+# Keep this to editor/OS droppings and language-agnostic noise. Anything
+# project-specific belongs in that project's own .gitignore.
+
 # macOS
 .DS_Store
+.DS_Store?
 
-# Editor / OS temp files
+# Editor and crash droppings
 *~
 *.swp
 *.swo
-*.kate-swp
+.idea/
 
-# Node
-node_modules
+# Build output that leaks past project ignores
+node_modules/
+dist/
+build/
 
-# Editors
-*.vscode
-
-##
-Mobile Documents
+# Local env files
+.env
+.env.local
+.direnv/
