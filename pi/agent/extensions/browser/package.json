@@ -5,9 +5,11 @@
   "type": "module",
   "description": "Playwright-driven headless browser tools for pi: navigate, eval, observe console/network, screenshot.",
   "pi": {
-    "extensions": ["./index.ts"]
+    "extensions": [
+      "./index.ts"
+    ]
   },
   "dependencies": {
-    "playwright-core": "^1.49.0"
+    "playwright-core": "^1.65.0"
   }
 }
