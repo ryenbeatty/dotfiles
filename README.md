@@ -53,3 +53,32 @@ which sets up a few paths that'll be different on your particular machine.
 defaults, and so on. Tweak this script, and occasionally run `dot` from
 time to time to keep your environment fresh and up-to-date. You can find
 this script in `bin/`.
+
+## pi (the coding agent)
+
+`pi/agent/` tracks the *config* half of `~/.pi/agent`, and `script/bootstrap`
+links each entry back into place:
+
+| tracked | left alone (machine state) |
+|---|---|
+| `settings.json`, `keybindings.json`, `models.json`, `mcp.json`, `mcp-adapter.json`, `web-search.json` | `auth.json`, `mcp-auth.json`, `trust.json`, `models-store.json` |
+| `extensions/` (each child: plan-mode, deepseek-balance, tool-collapse, hide-footer-status, sandbox, browser) | `sessions/`, `install/`, `mcp-cache.json`, `web-search-cache/`, `*.bak` |
+| `npm/package*.json`, `mcp-servers/*/package*.json` | `node_modules/`, `.profile/` |
+
+Linking is per-entry rather than whole-directory, because `~/.pi/agent` is a
+mix of config and runtime state: a whole-dir symlink would drag sessions and
+caches into git. Same reason `PI_CODING_AGENT_DIR` is not used here.
+
+`models.json` reads the DeepSeek key from the environment:
+
+```json
+"apiKey": "${DEEPSEEK_API_KEY}"
+```
+
+The value lives in `~/.localrc` (mode 600, outside this repo). pi must be
+started from a shell that sourced it, otherwise the provider has no
+credential; `pi /login` writes `auth.json` as an alternative.
+
+`pi/agent/install.sh` (run by `script/install`) installs the npm deps for the
+browser extension and the tracker MCP server manifests, plus playwright's
+chromium the first time.

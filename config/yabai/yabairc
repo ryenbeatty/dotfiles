@@ -31,3 +31,4 @@ yabai -m rule --add app="^Todoist$" manage=off
 yabai -m rule --add app="^Cold Turkey Blocker$" manage=off
 yabai -m rule --add app="^Loom$" manage=off
 yabai -m rule --add label="Screen Studio" app="^Screen Studio$" manage=off
+yabai -m rule --add label="CleanShot X" app="^CleanShot X$" manage=off
