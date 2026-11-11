@@ -1,7 +1,3 @@
-if [[ "$TERM_PROGRAM" == "vscode" && ! -t 1 ]]; then
-  return
-fi
-
 printf "\e[?1042l"
 
 export ZSH=$HOME/.dotfiles
@@ -99,11 +95,11 @@ fi
 #   2. zsh-syntax-highlighting -- sourced last; its highlighters get clobbered by
 #      any later zle setup, and fzf-tab's comment explicitly expects to run
 #      before it.
-# zsh-autosuggestions was removed deliberately: its grey text came from the
-# shared *global* history, so it offered paths from directories you were not in,
-# and the TAB widget that used to live below accepted that text before real
-# completion ever ran. fzf-tab filters compsys candidates, which are always
-# scoped to the command and the current directory.
+# NOTE: zsh-autosuggestions was removed deliberately and its vendored copy is
+# gone too: the grey text came from the shared *global* history, so it offered
+# paths from directories you were not in, and the old TAB widget accepted that
+# text before real completion ran. fzf-tab filters compsys candidates, which are
+# always scoped to the command and the current directory.
 _zsh_plugins="$ZSH/zsh/plugins"
 if [[ -t 0 ]]; then
   if [[ -f $_zsh_plugins/fzf-tab/fzf-tab.plugin.zsh ]]; then

@@ -1,0 +1,26 @@
+#compdef -command-
+#
+# Directories before executables at the command line.
+#
+# Stock _autocd (zsh's own, in /usr/share/zsh/.../functions) is:
+#
+#     _command_names
+#     local ret=$?
+#     [[ -o autocd ]] && _cd || return ret
+#
+# It generates the command matches *first*, and compsys keeps generation order,
+# so with AUTO_CD on, `code`<TAB> put codecctl/codesign/codesign_allocate above
+# ~/Code. tag-order cannot fix this: it reorders tags within a single completion
+# function's tag set, while executables and directories come from two different
+# calls (_command_names and _cd).
+#
+# So the directory pass runs first. If it matches, compsys has its answer and no
+# command candidates are generated for that word. A word that is not a directory
+# (`git`, `codesign`) matches nothing here and falls through to the same two
+# calls the stock function makes -- inlined, because calling `_autocd` from here
+# would just recurse into this file.
+_path_files -/ && return 0
+
+_command_names
+local ret=$?
+[[ -o autocd ]] && _cd || return ret

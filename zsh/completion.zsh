@@ -6,16 +6,43 @@ setopt autocd
 # ============================================================================
 
 # --- matching ---------------------------------------------------------------
-# 1st pass: case insensitive, 2nd: partial word ("git ch" -> "git checkout"),
-# 3rd: substring anywhere ("ods" -> "node_modules").
+# Two passes, both deliberate:
+#
+#   1. case-insensitive, so `code` reaches `Code`, `git co` reaches `COMMIT_EDITMSG`.
+#   2. partial word, but splitting only on `_` and `-`: `git comm-TAB` still finds
+#      `commit-*`.
+#
+# What was removed, and why:
+#   * `.` is no longer a split character (`[_-]`, not `[._-]`). It was what let a
+#     bare `code` match `.code`, `.codemod`, `.codex`: every dotfile name became a
+#     suffix match, so the home directory's tool configs swamped the one `Code`
+#     you actually meant.
+#   * the `l:|=* r:|=*` pass is gone: it matched a typed word *anywhere* inside a
+#     candidate, which is the other half of the same noise (`code` -> `xcode`,
+#     `node_modules` via `ods`). Prefix and word-boundary matching cover the real
+#     cases; substring-anywhere mostly surfaced dotdirs.
 zstyle ':completion:*' matcher-list \
   'm:{a-zA-Z}={A-Za-z}' \
-  'r:|[._-]=* r:|=*' \
-  'l:|=* r:|=*'
+  'r:|[_-]=* r:|=*'
 
 # try exact matches, then spell-fix, then approximate ("did you mean")
 zstyle ':completion:*' completer _expand _complete _approximate
 zstyle ':completion:*' max-errors 2 numeric
+
+# NOTE: don't try to put directories ahead of executables with tag-order here.
+# At command position the executables come from _command_names and the
+# directories from _cd -- two separate calls -- so tag-order (which reorders
+# tags inside one call) cannot express "dirs first". functions/_autocd shadows
+# zsh's own to do that.
+#
+# It has to be re-resolved here: `mise activate zsh` (node/path.zsh) runs before
+# this file and pulls in the completion system, which autoloads _autocd from
+# zsh's own functions directory -- a path that is baked into the autoload stub by
+# then, so simply having a better _autocd earlier on $fpath is not enough.
+# Dropping the stub and re-autoloading resolves it against the current $fpath,
+# where $ZSH/functions comes first.
+unfunction _autocd 2>/dev/null
+autoload -Uz _autocd
 
 # --- the menu ---------------------------------------------------------------
 # No `menu`/`select`/`select-prompt` here any more. The completion menu is now
@@ -99,6 +126,11 @@ fi
 #
 # fzf-tab does not read FZF_DEFAULT_OPTS (some flags break it), and this repo
 # sets FZF_DEFAULT_COMMAND only, so the picker stays default-clean.
-zstyle ':fzf-tab:*' fzf-flags --height=60% --bind=tab:accept
+#
+# --tiebreak=begin ranks candidates by *where* the match starts before anything
+# else, so a typed prefix wins over a later occurrence: `code` puts `Code` above
+# `.codex` / `xcode`. Without it fzf's length/score heuristic can float a short
+# dotfile above the directory you meant.
+zstyle ':fzf-tab:*' fzf-flags --height=60% --bind=tab:accept --tiebreak=begin
 # Show what is inside the directory you are about to cd into.
 zstyle ':fzf-tab:complete:cd:*' fzf-preview 'command ls -1 $realpath'
