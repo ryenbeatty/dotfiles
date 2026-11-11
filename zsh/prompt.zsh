@@ -36,5 +36,24 @@ directory_name() {
 
 # The prompt character is the literal glyph at the end of PROMPT (currently a
 # lambda); %F{8} paints it bright black and %f resets.
-PROMPT=$'\n$(directory_name) $(git_dirty)$(need_push)\n%F{8}λ%f '
+#
+# The blank line above the prompt is a separator between the prompt and the
+# previous command's output -- so it is only wanted from the *second* prompt on.
+# As a static leading $'\n' it also opened every new shell with an empty line
+# under "Last login", separating the prompt from nothing. precmd runs before
+# every prompt, including the first, so toggling the leading newline there puts
+# the blank line exactly where it means something.
+_prompt_body=$'$(directory_name) $(git_dirty)$(need_push)\n%F{8}λ%f '
+_prompt_first=1
+_prompt_precmd () {
+  if (( _prompt_first )); then
+    _prompt_first=0
+    PROMPT="$_prompt_body"
+  else
+    PROMPT=$'\n'"$_prompt_body"
+  fi
+}
+autoload -Uz add-zsh-hook
+add-zsh-hook precmd _prompt_precmd
+PROMPT="$_prompt_body"   # something sane before the first precmd
 RPROMPT=''
