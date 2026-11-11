@@ -1,65 +1,36 @@
-#!/bin/sh
+#!/usr/bin/env bash
 #
-# dot
+# dot -- run every topic's installer, in dependency order.
 #
-# `dot` handles installation, updates, things like that. Run it periodically
-# to make sure you're on the latest and greatest.
+# `script/install` owns the ordering (homebrew first, then the runtime topics);
+# this wrapper is only the command you type and the help text attached to it.
 
-set -e
+set -euo pipefail
 
-parentDirectory="$(cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd -P)"
-dotfilesDirectory="$(cd "$( dirname "$parentDirectory" )" && pwd -P)"
+DOTFILES="$(cd "$(dirname "$0")/.." && pwd -P)"
 
-displayUsageAndExit() {
-	echo "dot -- dotfiles management"
-	echo ""
-	echo "Usage: dot [options]"
-	echo ""
-	echo "Options:"
-	echo "  -e, --edit    Open dotfiles directory for editing"
-	echo "  -h, --help    Show this help message and exit"
-	exit
+usage () {
+  cat <<EOF
+dot -- dotfiles management
+
+Usage: dot [options]
+
+Options:
+  -e, --edit    Open $DOTFILES in \$EDITOR
+  -h, --help    Show this help message and exit
+
+Installs/updates Homebrew + the Brewfile, then runs each topic's install.sh.
+Idempotent: re-run it whenever you change a topic. It does not symlink files
+into \$HOME -- that is script/bootstrap.
+EOF
 }
 
-while test $# -gt 0; do
-	case "$1" in
-		"-h"|"--help")
-			displayUsageAndExit
-			;;
-		"-e"|"--edit")
-			exec "$EDITOR" "$dotfilesDirectory"
-			exit
-			;;
-		*)
-			echo "Invalid option: $1"
-			displayUsageAndExit
-			;;
-	esac
-	shift
-done
+case ${1:-} in
+  -h|--help) usage; exit 0 ;;
+  -e|--edit) exec "$EDITOR" "$DOTFILES" ;;
+  "") ;;
+  *) echo "dot: unknown option: $1" >&2; usage >&2; exit 1 ;;
+esac
+(( $# <= 1 )) || { echo "dot: too many arguments" >&2; usage >&2; exit 1; }
 
-export ZSH=$HOME/.dotfiles
-
-# Set macOS defaults
-# $ZSH/macos/set-defaults.sh
-
-# Install homebrew
-if [ -f "$ZSH/homebrew/install.sh" ]; then
-  $ZSH/homebrew/install.sh 2>&1
-fi
-
-# Upgrade homebrew (if available)
-if command -v brew >/dev/null 2>&1; then
-  echo "› brew update"
-  brew update
-else
-  echo "› Homebrew not found, skipping update"
-fi
-
-# Install software
-if [ -f "$ZSH/script/install" ]; then
-  echo "› $ZSH/script/install"
-  $ZSH/script/install
-else
-  echo "› Install script not found, skipping"
-fi
+exec "$DOTFILES/script/install"

@@ -14,3 +14,50 @@ alias gcb='git branch --show-current | pbcopy'
 alias gb='git branch'
 alias gs='git status -sb' # upgrade your git if -sb breaks for you. it's fun.
 alias gac='git add -A && git commit -m'
+
+# --- multi-line shorthands ------------------------------------------------
+# These used to be standalone `bin/git-*` scripts: a file, a shebang and a PATH
+# lookup each, for one git invocation. Same names, now plain shell functions --
+# they work in any shell that sources this file, and `type git-undo` shows the
+# body instead of hiding it in a subprocess.
+
+git-amend () {
+  git commit --amend -C HEAD "$@"
+}
+
+git-undo () {
+  git reset --soft HEAD^
+}
+
+git-nuke () {
+  if (( $# != 1 )); then
+    echo "usage: git-nuke <branch>" >&2
+    return 1
+  fi
+  git branch -D "$1" && git push origin ":$1"
+}
+
+git-delete-local-merged () {
+  local merged
+  merged=$(git branch --merged | grep -v '^\*' | grep -v 'master' | tr -d ' ')
+  if [[ -z $merged ]]; then
+    echo "nothing merged into HEAD" >&2
+    return 0
+  fi
+  git branch -d ${(f)merged}
+}
+
+git-unpushed () {
+  local branch
+  branch=$(git rev-parse --abbrev-ref HEAD) || return
+  git diff "origin/$branch..HEAD" "$@"
+}
+
+git-unpushed-stat () {
+  local branch count s
+  branch=$(git rev-parse --abbrev-ref HEAD) || return
+  count=$(git rev-list --count "HEAD" "origin/$branch...HEAD")
+  (( count == 1 )) || s='s'
+  git diff --stat "origin/$branch..HEAD"
+  echo " $count commit$s total"
+}

@@ -1,0 +1,38 @@
+#!/usr/bin/env bash
+#
+# extract <archive> [dest] -- unpack any of the usual archive types.
+#
+# Was an autoloaded zsh function in functions/ (a #!/bin/sh file that redefined
+# itself, which is the holman-dotfiles idiom). bin/ is already on $PATH, so it is
+# a plain script now: no shell-specific syntax, works from bash, sh, zsh, ci.
+
+set -euo pipefail
+
+usage () {
+  echo "usage: extract <archive> [destination]" >&2
+  echo "  handles: .tar{,.gz,.bz2,.xz,.zst} .tgz .tbz2 .txz .zip .7z .rar .gz .bz2 .xz .dmg" >&2
+  exit 1
+}
+
+(( $# >= 1 )) || usage
+[[ -f $1 ]] || { echo "not a file: $1" >&2; exit 1; }
+
+src=$1
+dest=${2:-.}
+mkdir -p "$dest"
+
+case $src in
+  *.tar.gz|*.tgz)      tar -xzf "$src" -C "$dest" ;;
+  *.tar.bz2|*.tbz2)    tar -xjf "$src" -C "$dest" ;;
+  *.tar.xz|*.txz)      tar -xJf "$src" -C "$dest" ;;
+  *.tar.zst)           tar --zstd -xf "$src" -C "$dest" ;;
+  *.tar)               tar -xf "$src" -C "$dest" ;;
+  *.zip)               unzip -q "$src" -d "$dest" ;;
+  *.7z)                7z x -o"$dest" "$src" ;;
+  *.rar)               unrar x "$src" "$dest/" ;;
+  *.gz)                gunzip -c "$src" > "$dest/$(basename "${src%.gz}")" ;;
+  *.bz2)               bunzip2 -c "$src" > "$dest/$(basename "${src%.bz2}")" ;;
+  *.xz)                unxz -c "$src" > "$dest/$(basename "${src%.xz}")" ;;
+  *.dmg)               hdiutil attach "$src" ;;
+  *)                   echo "unsupported archive: $src" >&2; exit 1 ;;
+esac

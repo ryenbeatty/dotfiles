@@ -1,4 +1,10 @@
-gf() {
-  local branch=$1
-  git checkout -b $branch origin/$branch
+gf () {
+  if (( $# != 1 )); then
+    echo "usage: gf <branch-existing-on-origin>" >&2
+    return 1
+  fi
+  # switch --track rather than `checkout -b x origin/x`: same result, but it
+  # fails loudly on a branch that does not exist instead of creating a local
+  # branch off a stale start point.
+  git switch --create "$1" --track "origin/$1"
 }
