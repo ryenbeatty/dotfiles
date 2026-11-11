@@ -1,0 +1,46 @@
+{
+  "settings": {
+    "mcpFooterStatus": "off",
+    "showStatusIcon": false,
+    "notifyOnStartupConnect": false
+  },
+  "mcpServers": {
+    "blender": {
+      "command": "uvx",
+      "args": [
+        "--python",
+        "3.11",
+        "mcp-for-blender"
+      ],
+      "env": {
+        "UV_PYTHON_PREFERENCE": "only-managed"
+      },
+      "directTools": "search",
+      "description": "Blender: prompt-assisted 3D modeling and scene creation (requires the Blender addon)"
+    },
+    "figma": {
+      "url": "https://mcp.figma.com/mcp",
+      "oauth": {
+        "clientName": "Claude Code"
+      },
+      "directTools": "search",
+      "description": "Figma: read files, frames, components, and styles from Figma designs"
+    },
+    "mobbin": {
+      "url": "https://api.mobbin.com/mcp",
+      "directTools": "search",
+      "description": "Mobbin: search real-world mobile and web UI design screens, flows, and patterns"
+    },
+    "rhino": {
+      "command": "uvx",
+      "args": [
+        "rhinomcp@latest"
+      ],
+      "env": {
+        "RHINO_MCP_HOST": "127.0.0.1"
+      },
+      "directTools": "search",
+      "description": "Rhino 3D + Grasshopper: model geometry, read the document, capture viewport, and script Grasshopper"
+    }
+  }
+}

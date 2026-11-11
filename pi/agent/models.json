@@ -1,0 +1,49 @@
+{
+  "$schema": "https://pi.dev/schemas/models.schema.json",
+  "providers": {
+    "deepseek": {
+      "baseUrl": "https://api.deepseek.com",
+      "api": "openai-completions",
+      "apiKey": "${DEEPSEEK_API_KEY}",
+      "models": [
+        {
+          "id": "deepseek-v4-flash",
+          "name": "DeepSeek V4 Flash",
+          "contextWindow": 1000000,
+          "maxTokens": 384000,
+          "input": ["text"],
+          "reasoning": true,
+          "compat": {
+            "requiresReasoningContentOnAssistantMessages": true,
+            "thinkingFormat": "deepseek",
+            "reasoningEffortMap": {
+              "minimal": "high", "low": "high", "medium": "high",
+              "high": "high", "xhigh": "max"
+            }
+          }
+        }
+      ]
+    },
+    "rapid-mlx": {
+      "name": "Rapid-MLX (local)",
+      "baseUrl": "http://localhost:8000/v1",
+      "api": "openai-completions",
+      "apiKey": "rapid-mlx",
+      "models": [
+        {
+          "id": "qwen3.6-35b-4bit",
+          "name": "Qwen3.6 35B-A3B 4-bit (Rapid-MLX, fast MoE)",
+          "reasoning": true,
+          "input": ["text"],
+          "contextWindow": 131072,
+          "maxTokens": 32768,
+          "cost": { "input": 0, "output": 0, "cacheRead": 0, "cacheWrite": 0 },
+          "compat": {
+            "thinkingFormat": "qwen",
+            "maxTokensField": "max_tokens"
+          }
+        }
+      ]
+    }
+  }
+}

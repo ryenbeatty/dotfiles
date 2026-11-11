@@ -73,15 +73,6 @@
       "installedAt": "2026-10-25T08:03:28.195Z",
       "updatedAt": "2026-10-25T08:03:28.195Z"
     },
-    "ask-sonner": {
-      "source": "emilkowalski/skills",
-      "sourceType": "github",
-      "sourceUrl": "https://github.com/emilkowalski/skills.git",
-      "skillPath": "skills/ask-sonner/SKILL.md",
-      "skillFolderHash": "aeca3dba0eb0415fa5a310cd6823b824fe60323d",
-      "installedAt": "2026-10-25T08:03:28.195Z",
-      "updatedAt": "2026-10-25T08:03:28.195Z"
-    },
     "break-ui": {
       "source": "emilkowalski/skills",
       "sourceType": "github",

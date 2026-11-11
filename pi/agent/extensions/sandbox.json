@@ -1,0 +1,17 @@
+{
+  "network": {
+    "allowedDomains": [
+      "api.linear.app",
+      "api.are.na",
+      "registry.npmjs.org",
+      "fonts.gstatic.com",
+      "repo.yarnpkg.com",
+      "registry.yarnpkg.com",
+      "ofcncog2cu-dsn.algolia.net",
+      "telemetry.astro.build",
+      "ws.audioscrobbler.com",
+      "example.com",
+      "api.weatherapi.com"
+    ]
+  }
+}

@@ -141,6 +141,71 @@ install_config_files () {
 setup_gitconfig
 install_dotfiles
 install_config_files
+install_pi_config () {
+  info 'installing pi config'
+
+  local pi_root="$DOTFILES_ROOT/pi/agent"
+  local pi_home="$HOME/.pi/agent"
+  if [ ! -d "$pi_root" ]
+  then
+    info 'no pi/agent directory found, skipping'
+    return
+  fi
+  mkdir -p "$pi_home"
+
+  local overwrite_all=false backup_all=false skip_all=false
+  local src name dir
+
+  # Top-level config files (settings.json, models.json, mcp.json, ...).
+  for src in "$pi_root"/*.json
+  do
+    [ -e "$src" ] || continue
+    link_file "$src" "$pi_home/$(basename "$src")"
+  done
+
+  # Extensions: link each child, not the directory, so pi (or you) can still
+  # drop new extensions into ~/.pi/agent/extensions without them landing in
+  # the repo. node_modules stays a real directory.
+  for src in "$pi_root/extensions"/*
+  do
+    [ -e "$src" ] || continue
+    link_file "$src" "$pi_home/extensions/$(basename "$src")"
+  done
+
+  # npm/ and mcp-servers/: manifests only. node_modules and .profile are
+  # machine state and must not point into the repo.
+  for src in "$pi_root"/npm/package*.json
+  do
+    [ -e "$src" ] || continue
+    mkdir -p "$pi_home/npm"
+    link_file "$src" "$pi_home/npm/$(basename "$src")"
+  done
+  for dir in "$pi_root"/mcp-servers/*/
+  do
+    [ -d "$dir" ] || continue
+    name=$(basename "$dir")
+    mkdir -p "$pi_home/mcp-servers/$name"
+    for src in "${dir%/}"/package*.json
+    do
+      [ -e "$src" ] || continue
+      link_file "$src" "$pi_home/mcp-servers/$name/$(basename "$src")"
+    done
+  done
+
+  # Skills: link each skill directory, not skills/ itself, because pi also
+  # installs skills that this repo does not track.
+  if [ -d "$pi_root/skills" ]
+  then
+    for dir in "$pi_root"/skills/*/
+    do
+      [ -d "$dir" ] || continue
+      link_file "${dir%/}" "$pi_home/skills/$(basename "$dir")"
+    done
+  fi
+
+  success 'pi config links installed'
+}
+install_pi_config
 install_skills () {
   info 'installing skills symlink'
   mkdir -p "$HOME/.agents"

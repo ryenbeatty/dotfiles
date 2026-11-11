@@ -1,0 +1,20 @@
+{
+  "mcpServers": {
+    "paper": {
+      "command": "/Users/ryenbeatty/.paper/bin/paper",
+      "args": [
+        "mcp"
+      ],
+      "exposure": "deferred",
+      "description": "Paper: read and write Paper design files live on the canvas (frames, nodes, JSX/HTML export, screenshots, design tokens, comments)"
+    },
+    "agentation": {
+      "command": "node",
+      "args": [
+        "/Users/ryenbeatty/.pi/agent/mcp-servers/agentation-mcp/node_modules/agentation-mcp/dist/cli.js",
+        "server"
+      ],
+      "description": "Agentation: visual feedback annotations from the browser (click-to-annotate toolbar) — list, read, reply to, resolve and watch notes the user places on the running app"
+    }
+  }
+}

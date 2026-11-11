@@ -5,5 +5,12 @@ node_modules
 # pi agent scratch output
 .pi/quiet-tools/
 
+# pi config is tracked under pi/agent; its runtime state is not.
+# (sessions/, auth.json, caches and install/ live only in ~/.pi/agent)
+pi/agent/extensions/*/node_modules/
+pi/agent/npm/node_modules/
+pi/agent/mcp-servers/*/node_modules/
+pi/agent/extensions/browser/.profile/
+
 # local repo snapshots (see script/migrate-home.sh)
 .backup/
