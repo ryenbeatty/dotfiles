@@ -15,12 +15,12 @@ git clone https://github.com/ryenbeatty/dotfiles.git ~/.dotfiles
 bin/          scripts on $PATH (dot, e, extract, dns-flush, tmux-sessionizer)
 config/       whole-directory symlinks: ~/.config/{nvim,skhd,yabai,uv}
 functions/    autoloaded zsh functions (c, gf)
-git/          git aliases + multi-line shorthands, completions, gitconfig
+git/          git aliases, functions, gitconfig + gitignore symlinks
 system/       $PATH, env vars, base aliases, ~/.hushlogin (silences login banner)
 zsh/          zshrc, prompt, history/completion options, vendored plugins
 tmux/  nvim/  tmux and neovim config
 Brewfile      every Homebrew formula, cask, tap and font (homebrew/install.sh)
-script/       bootstrap, install, migrate-home
+script/       bootstrap (symlinks), install (topic installers)
 skills/       agent skills, shared by every harness
 ```
 
@@ -63,16 +63,6 @@ dot -e              # open this repo in $EDITOR
 brew bundle check --file=~/.dotfiles/Brewfile   # what's missing, install nothing
 ```
 
-`script/migrate-home.sh` is the one-off convergence script for the parts of
-`$HOME` a repo can't own (stale symlinks, retired toolchains, dead state). It
-defaults to a dry run:
-
-```sh
-bash ~/.dotfiles/script/migrate-home.sh           # print intended actions
-bash ~/.dotfiles/script/migrate-home.sh --apply   # do them
-```
-
-It is re-runnable and guards each removal, so a second pass is a no-op.
-
-`setup-scripts/` is a dated snapshot of an old laptop build, kept for reference
-only — the live path is `script/bootstrap` + `bin/dot`.
+`script/bootstrap` links files into `$HOME`; `bin/dot` runs every topic's
+`install.sh` (homebrew first). Both are re-runnable — nothing here is a one-time
+migration script any more.

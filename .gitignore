@@ -17,5 +17,5 @@ pi/agent/extensions/browser/.profile/
 # on any install). The bun.lock files are tracked.
 package-lock.json
 
-# local repo snapshots (see script/migrate-home.sh)
+# local repo snapshots (taken before any bootstrap/dot re-run)
 .backup/
