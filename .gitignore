@@ -12,5 +12,10 @@ pi/agent/npm/node_modules/
 pi/agent/mcp-servers/*/node_modules/
 pi/agent/extensions/browser/.profile/
 
+# bun owns the lockfiles here: pi installs its extensions and npm/ packages with
+# bun, so package-lock.json is a second source of truth (and npm regenerates one
+# on any install). The bun.lock files are tracked.
+package-lock.json
+
 # local repo snapshots (see script/migrate-home.sh)
 .backup/
