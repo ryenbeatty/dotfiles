@@ -18,7 +18,7 @@ brew "fzf"             # Ctrl-R history, fzf-tab, tmux-sessionizer
 brew "ripgrep"         # grep replacement; also nvim's picker backend
 brew "grc"             # colourised output for common commands
 brew "coreutils"       # gls etc. -- system/aliases.zsh keys off gls
-brew "ghostty"
+brew "watch"           # gittail alias
 
 # --- core CLI ----------------------------------------------------------------
 brew "git"
@@ -27,7 +27,10 @@ brew "jq"
 brew "tree"
 brew "wget"
 brew "tmux"
-brew "nvim"
+brew "neovim"           # formula is neovim, not nvim
+brew "deno"             # nvim/pi tooling (better-sqlite3 builds, TS scripts)
+brew "esbuild"          # borrowed by tsup/vite workflows
+brew "ffmpeg"           # media conversion; also imagemagick's runtime
 
 # --- toolchains --------------------------------------------------------------
 brew "mise"            # node version switching (node/install.sh)
@@ -41,6 +44,9 @@ brew "koekeishiya/formulae/skhd"
 # --- browsers ----------------------------------------------------------------
 cask "zen-browser"
 cask "firefox"
+
+# --- terminals ---------------------------------------------------------------
+cask "ghostty"         # current terminal (alacritty: see note at EOF)
 
 # --- apps --------------------------------------------------------------------
 cask "alacritty"
@@ -68,3 +74,13 @@ cask "cold-turkey-blocker"
 # --- fonts -------------------------------------------------------------------
 cask "font-blex-mono-nerd-font"
 cask "font-geist-mono-nerd-font"
+
+# --- deliberately not managed ------------------------------------------------
+# Installed on this machine but not declared above, so 'brew bundle' will not
+# touch them: cocoapods, emacs-mac (neither used by the dotfiles). Uninstall
+# them if you do not want them.
+#
+# cask "alacritty" is declared above but Alacritty is not in Homebrew's Caskroom
+# on this machine -- the copy in /Applications was installed by hand. It is kept
+# because config/alacritty/ is still versioned; delete both if Ghostty has fully
+# replaced it.
