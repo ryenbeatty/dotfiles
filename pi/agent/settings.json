@@ -1,5 +1,5 @@
 {
-  "lastChangelogVersion": "1.5.0",
+  "lastChangelogVersion": "1.5.2",
   "defaultProvider": "deepseek",
   "defaultModel": "deepseek-flash",
   "compaction": {
@@ -14,11 +14,11 @@
   "enableInstallTelemetry": false,
   "packages": [
     "npm:pi-mcp-adapter",
-    "npm:pi-web-access",
     "npm:@sysid/pi-sandbox"
   ],
   "extensions": [
-    "-builtin:mcp"
+    "-builtin:mcp",
+    "pi-qmd"
   ],
   "extensionChangelogVersions": {
     "{\"source\":\"npm:pi-mcp-adapter\",\"scope\":\"user\"}": "7.0.1",
