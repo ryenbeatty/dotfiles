@@ -24,8 +24,9 @@ return {
     -- One list for everything mason should provide, servers included, so a
     -- single `:MasonToolsInstallSync` (nvim/install.sh) provisions the lot.
     -- Names are mason *package* names, which differ from lspconfig's server
-    -- names: html/css/json come from html-lsp / css-lsp / json-lsp (there is no
-    -- `vscode-langservers-extracted` package in the current registry).
+    -- names: html/css/json come from html-lsp / css-lsp / json-lsp, one package
+    -- each (the old single "langservers-extracted" bundle is no longer in the
+    -- current registry, which is why the three are listed separately).
     opts = {
       ensure_installed = {
         "lua-language-server",

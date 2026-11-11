@@ -30,13 +30,16 @@ echo "› installing language servers and formatters (mason)"
 nvim --headless "+Lazy! load mason-tool-installer.nvim" "+MasonToolsInstallSync" +qa
 
 # nvim exits 0 even when a :command callback throws, so prove the install
-# actually produced binaries instead of trusting the exit code.
+# actually provisioned each package instead of trusting the exit code. Checked by
+# mason *package* name (the same list as config/nvim/lua/plugins/lsp.lua) rather
+# than by binary: several packages ship binaries whose upstream names have no
+# relation to the package they come from, which made the old list a second,
+# drifting copy of the same information.
 missing=0
-for bin in lua-language-server typescript-language-server \
-           vscode-html-language-server vscode-css-language-server \
-           vscode-json-language-server vscode-eslint-language-server \
-           yaml-language-server stylua prettier eslint_d; do
-  [[ -x $HOME/.local/share/nvim/mason/bin/$bin ]] || { echo "  missing: $bin"; missing=1; }
+for pkg in lua-language-server typescript-language-server \
+           html-lsp css-lsp json-lsp eslint-lsp yaml-language-server \
+           stylua prettier eslint_d; do
+  [[ -d $HOME/.local/share/nvim/mason/packages/$pkg ]] || { echo "  missing: $pkg"; missing=1; }
 done
 if (( missing )); then
   echo "mason install incomplete -- open nvim and check :Mason" >&2
