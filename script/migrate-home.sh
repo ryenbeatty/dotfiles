@@ -88,17 +88,17 @@ done
 
 # ------------------------------------------------------------- 3. dead clones
 hr "unused ~/.oh-my-zsh clone (24MB)"
-# zsh/plugins/{zsh-autosuggestions,zsh-syntax-highlighting} are vendored in the
-# repo and $ZSH points at ~/.dotfiles, so nothing reads this anymore.
+# zsh/plugins/{fzf-tab,zsh-syntax-highlighting} are vendored in the repo and
+# $ZSH points at ~/.dotfiles, so nothing reads this anymore.
 if [[ -d $HOME/.oh-my-zsh ]]; then
   run du -sh "$HOME/.oh-my-zsh"
   run trash "$HOME/.oh-my-zsh"
 fi
 
 hr "~/.local/scripts/tmux-git-sessionizer"
-# Byte-identical to ~/.dotfiles/bin/tmux-sessionizer. bin/ is on PATH and also
-# exposes the old name (bin/tmux-git-sessionizer -> tmux-sessionizer), so
-# removing this copy loses nothing.
+# Was byte-identical to ~/.dotfiles/bin/tmux-sessionizer, which is the one tmux's
+# C-f binding runs. The duplicate in bin/ (and this copy) are both gone; the name
+# tmux-git-sessionizer existed only because the script started out git-specific.
 if [[ -f $HOME/.local/scripts/tmux-git-sessionizer ]]; then
   run trash "$HOME/.local/scripts/tmux-git-sessionizer"
   run rmdir "$HOME/.local/scripts"   # only succeeds if now empty

@@ -1,21 +1,40 @@
 #!/usr/bin/env bash
 #
-# Run all dotfiles installers.
+# Run every topic's install.sh, in dependency order.
+#
+# Ordering matters: the topics below assume a working Homebrew (node/ and
+# python/ install mise and uv with it), so homebrew/ runs first and everything
+# else follows in plain sort order. A topic that is missing is simply skipped --
+# script/install is generic, it does not know the topic names.
 
 set -euo pipefail
 
 cd "$(dirname "$0")/.."
 
-# find the installers and run them iteratively
-if ! find . -name install.sh -print0 | while IFS= read -r -d '' installer; do
-  echo "Running installer: $installer"
-  if ! bash "$installer"; then
-    echo "Failed to run installer: $installer"
-    exit 1
-  fi
-done; then
-  echo "Some installers failed"
+# Topic installers, homebrew first, then the rest alphabetically.
+installers=()
+[[ -f ./homebrew/install.sh ]] && installers+=(./homebrew/install.sh)
+while IFS= read -r installer; do
+  [[ $installer == ./homebrew/install.sh ]] && continue
+  installers+=("$installer")
+done < <(find . -name install.sh -not -path './.git/*' | sort)
+
+if (( ${#installers[@]} == 0 )); then
+  echo "no installers found"
   exit 1
 fi
 
-echo "All installers completed successfully"
+failed=()
+for installer in "${installers[@]}"; do
+  echo "› running $installer"
+  if ! bash "$installer"; then
+    failed+=("$installer")
+  fi
+done
+
+if (( ${#failed[@]} )); then
+  printf 'failed: %s\n' "${failed[@]}" >&2
+  exit 1
+fi
+
+echo "› all installers completed"
