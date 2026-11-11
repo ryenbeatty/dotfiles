@@ -61,3 +61,10 @@ git-unpushed-stat () {
   git diff --stat "origin/$branch..HEAD"
   echo " $count commit$s total"
 }
+
+# Watching a repo is a loop, not an alias: this used to be one line of
+# alias-quoting-into-watch-into-sh. Single quotes survive the double quotes here,
+# so watch's shell sees a plain --pretty=format:'...'.
+gittail () {
+  watch -n 1 -c "git log --graph --pretty=format:'%h %d %s %cr' --abbrev-commit -15"
+}

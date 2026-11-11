@@ -118,52 +118,23 @@ unset _zsh_plugins
 # history suggestion on TAB disappeared with zsh-autosuggestions; → and End keep
 # their stock line-editor meaning.
 
-#determines search program for fzf
-if type ag &> /dev/null; then
-    export FZF_DEFAULT_COMMAND='ag -p ~/.gitignore -g ""'
-fi
-#refer rg over ag
+# fzf's file source: ripgrep, minus .git internals (--hidden on its own made the
+# picker walk git's object store). `ag` was tried first but is not installed, and
+# the rg branch overwrote it anyway.
 if type rg &> /dev/null; then
-    export FZF_DEFAULT_COMMAND='rg --files --hidden'
+    export FZF_DEFAULT_COMMAND='rg --files --hidden --glob "!.git/*"'
 fi
-
-# Auto-start tmux session when entering project directories (if tmux is available)
-cd() {
-    builtin cd "$@" || return
-
-    # Only proceed if tmux is installed
-    if ! command -v tmux >/dev/null 2>&1; then
-        return
-    fi
-
-    # Only activate for git repositories or directories with specific files
-    if [[ -d .git ]] || [[ -f package.json ]] || [[ -f Cargo.toml ]]; then
-        # Only run if we're not already in tmux, and not inside a herdr pane: tmux
-        # does not carry HERDR_ENV/HERDR_PANE_ID/HERDR_SOCKET_PATH through, and
-        # herdr needs them to see the agent running in a pane.
-        if [[ -z "$TMUX" && -z "$HERDR_ENV" && -z "$HERDR_PANE_ID" ]]; then
-            session_name=$(basename "$PWD" | tr . _)
-
-            # Check if session exists
-            if ! tmux has-session -t="$session_name" 2> /dev/null; then
-                # Create new session in background
-                tmux new-session -d -s "$session_name"
-            fi
-
-            # Attach to the session
-            tmux attach-session -t "$session_name"
-        fi
-    fi
-}
-
-alias gittail='watch -n 1 -c "git log --graph --pretty=format:'"'"'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset'"'"' --abbrev-commit -15"'
-
-alias notify='afplay /System/Library/Sounds/Funk.aiff'
 
 if command -v wt >/dev/null 2>&1; then eval "$(command wt config shell init zsh)"; fi
 
 # PATH entries live in system/_path.zsh, tool env vars in system/env.zsh,
 # private keys in ~/.localrc, and aliases in zsh/aliases.zsh.
-
-# bun completions
-[ -s "/Users/ryenbeatty/.bun/_bun" ] && source "/Users/ryenbeatty/.bun/_bun"
+#
+# NOTE: `cd` used to be redefined here to create/attach a tmux session whenever
+# you entered a git repo (or a dir with package.json/Cargo.toml). That duplicated
+# bin/tmux-sessionizer, which does it deliberately and is bound to C-f both here
+# and in tmux. A `cd` that silently switches terminal multiplexers is a surprise
+# in a core builtin, so it is gone: use the keybinding, or run tmux-sessionizer.
+#
+# bun's completions are sourced once, from bun/path.zsh (which uses $HOME rather
+# than this machine's hardcoded /Users/ryenbeatty).
