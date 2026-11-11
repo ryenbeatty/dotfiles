@@ -221,6 +221,17 @@ if brew_has_formula bun; then
   run brew uninstall bun
 fi
 
+# pnpm is retired (the pnpm/ topic is gone; npm ships with node, bun is the
+# scriptable runner). It was installed twice: the Homebrew formula, and the
+# standalone installer's shims + store in ~/Library/pnpm -- the latter was only
+# on PATH via the deleted pnpm/path.zsh. Both go, along with the update-check
+# stamp. pnpm-lock.yaml in individual projects is left alone.
+if brew_has_formula pnpm; then
+  run brew uninstall pnpm
+fi
+[[ -d $HOME/Library/pnpm ]] && run trash "$HOME/Library/pnpm"
+[[ -d $HOME/.pnpm-state ]] && run trash "$HOME/.pnpm-state"
+
 # ----------------------------------------------------------------- 5. skills
 hr "skill harness links"
 # One tree (~/.dotfiles/skills, symlinked as ~/.agents/skills) for every
