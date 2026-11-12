@@ -16,6 +16,7 @@ bin/          scripts on $PATH (dot, e, extract, dns-flush, tmux-sessionizer)
 config/       whole-directory symlinks: ~/.config/{nvim,skhd,yabai,uv}
 functions/    autoloaded zsh functions (c, gf)
 git/          git aliases, functions, gitconfig + gitignore symlinks
+rust/         install.sh + path.zsh for the rustup toolchain (~/.cargo/bin)
 system/       $PATH, env vars, base aliases, ~/.hushlogin (silences login banner)
 zsh/          zshrc, prompt, history/completion options, vendored plugins
 tmux/  nvim/  tmux and neovim config
@@ -24,7 +25,7 @@ script/       bootstrap (symlinks), install (topic installers)
 skills/       agent skills, shared by every harness
 ```
 
-Runtime topics — `node/`, `python/`, `bun/`, `homebrew/` — own their own
+Runtime topics — `node/`, `python/`, `bun/`, `rust/`, `homebrew/` — own their own
 `install.sh` and `path.zsh`:
 
 | runtime | owner | switching |
@@ -32,10 +33,11 @@ Runtime topics — `node/`, `python/`, `bun/`, `homebrew/` — own their own
 | node | mise (`config/mise/config.toml`) | per-directory via `.nvmrc` / `.node-version` |
 | python + CLIs | uv (`python/pythons.txt`, `python/tools.txt`) | `uv python install` / `uv tool install` |
 | bun | Bun's own installer (`~/.bun/bin`) | n/a |
+| rust | rustup (`~/.cargo/bin`, `~/.rustup`) | `rustup default <toolchain>` / `rustup update` |
 | everything else | Homebrew (`Brewfile`) | n/a |
 
-No pyenv, no fnm, no nvm, no pnpm, no yarn: one owner per runtime, so a binary
-can never come from two places.
+No pyenv, no fnm, no nvm, no pnpm, no yarn, no `brew install rust`: one owner per
+runtime, so a binary can never come from two places.
 
 ## how files load
 
