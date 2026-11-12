@@ -77,13 +77,22 @@ zstyle ':completion:*:*:kill:*:processes' list-colors '=(#b) #([0-9]#)*=0=01;31'
 # TAB-completed.
 zstyle ':completion:*' special-dirs false
 zstyle ':completion:*' squeeze-slashes true # `cd foo//bar` -> `cd foo/bar`
-# tag-order *restricts* completion to the tags listed. The old value named
-# path-directories (i.e. cdpath) and directory-stack, which kept both in play --
-# the comment above it claimed the opposite. A lone `-` value means "only the
-# tags named, never fall back to the unlisted ones", so `cd <TAB>` can now only
-# offer directories inside $PWD. (`directory-stack` is dead weight in practice:
-# `_cd` only asks for it when the word starts with a `-`/`+`.)
-zstyle ':completion:*:cd:*' tag-order local-directories directory-stack -
+# tag-order *restricts* completion to the tags listed. A lone `-` value means
+# "only the tags named, never fall back to the unlisted ones", so the tags in
+# this list must cover every path `_cd` can take:
+#   directories      -- the ordinary case: `cd foo`, `cd ~/x`, `cd /x`
+#   local-directories -- only exists when $cdpath is set; still listed so
+#                        enabling cdpath later does not silently kill `cd <TAB>`
+#   directory-stack  -- `cd -<TAB>` / `cd +<TAB>`
+# Leaving `directories` out (the previous value) is what broke `cd ~/.do<TAB>`:
+# with cdpath unset, `_cd` tags its matches `directories` (see the
+# `${cdpath+local-}directories` line in _cd), which was not listed and could not
+# be fallen back to, so exact completion produced nothing, _approximate then
+# produced nothing either, and all that was left to print was the approximate
+# group's message: "-- no matches for: `corrections' --".
+# path-directories (cdpath) stays out on purpose: `cd <TAB>` should only offer
+# directories under $PWD.
+zstyle ':completion:*:cd:*' tag-order directories local-directories directory-stack -
 
 # --- cache & freshness ------------------------------------------------------
 # cache expensive completions (dpkg/apt style listings, git refs, ...)
