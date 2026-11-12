@@ -14,11 +14,11 @@
   "enableInstallTelemetry": false,
   "packages": [
     "npm:pi-mcp-adapter",
-    "npm:@sysid/pi-sandbox"
+    "npm:@sysid/pi-sandbox",
+    "npm:pi-qmd"
   ],
   "extensions": [
-    "-builtin:mcp",
-    "pi-qmd"
+    "-builtin:mcp"
   ],
   "extensionChangelogVersions": {
     "{\"source\":\"npm:pi-mcp-adapter\",\"scope\":\"user\"}": "7.0.1",
